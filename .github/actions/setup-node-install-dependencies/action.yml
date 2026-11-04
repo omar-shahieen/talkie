@@ -1,5 +1,5 @@
 name: Setup Node Environment
-description: Setup Node and install dependencies
+description: Setup Node, install dependencies and derive Nx base/head SHAs
 
 inputs:
   node-version:
@@ -24,3 +24,6 @@ runs:
     - name: Install dependencies
       shell: bash
       run: npm ci
+
+    - name: Derive appropriate SHAs for base and head for `nx affected` commands
+      uses: nrwl/nx-set-shas@v5

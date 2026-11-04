@@ -14,6 +14,7 @@ jobs:
   quality:
     name: Quality Checks
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -21,21 +22,20 @@ jobs:
           fetch-depth: 0
           filter: "tree:0"
 
-      - name: Setup Node.js Environment and install dependencies
+      - name: Setup Node.js, install dependencies and derive Nx SHAs
         uses: ./.github/actions/setup-node-install-dependencies
-
-      - name: Derive appropriate SHAs for base and head for `nx affected` commands
-        uses: nrwl/nx-set-shas@v5
 
       - name: Run affected commands
         run: npx nx affected -t format:check typecheck lint
 
-      - name: do cleanup for CI
+      - name: Do cleanup for CI
         run: npx nx fix-ci
         if: always()
+
   unit-test:
     name: Unit Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -43,23 +43,22 @@ jobs:
           fetch-depth: 0
           filter: "tree:0"
 
-      - name: Setup Node.js Environment and install dependencies
+      - name: Setup Node.js, install dependencies and derive Nx SHAs
         uses: ./.github/actions/setup-node-install-dependencies
-
-      - name: Derive appropriate SHAs for base and head for `nx affected` commands
-        uses: nrwl/nx-set-shas@v5
 
       - name: Run affected commands
         run: npx nx affected -t test
 
-      - name: do cleanup for CI
+      - name: Do cleanup for CI
         run: npx nx fix-ci
         if: always()
 
+  # Runs in parallel with quality and unit-test. Validates that apps and
+  # Docker images build on every push and PR. Never touches registry credentials.
   build:
     name: Build
-    needs: [quality, unit-test]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -67,11 +66,8 @@ jobs:
           fetch-depth: 0
           filter: "tree:0"
 
-      - name: Setup Node.js Environment and install dependencies
+      - name: Setup Node.js, install dependencies and derive Nx SHAs
         uses: ./.github/actions/setup-node-install-dependencies
-
-      - name: Derive appropriate SHAs for base and head for `nx affected` commands
-        uses: nrwl/nx-set-shas@v5
 
       - name: Build applications
         run: npx nx affected -t build
@@ -89,13 +85,51 @@ jobs:
           --tag=${{ github.sha }}
           --buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
+      - name: Do cleanup for CI
+        run: npx nx fix-ci
+        if: always()
+
+  # Only runs on pushes to main, and only after every check has passed.
+  # Jobs don't share a Docker daemon, so images are rebuilt here; the GHA
+  # layer cache populated by the build job should make this mostly cache hits.
+  publish:
+    name: Publish
+    needs: [quality, unit-test, build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          filter: "tree:0"
+
+      - name: Setup Node.js, install dependencies and derive Nx SHAs
+        uses: ./.github/actions/setup-node-install-dependencies
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Expose GitHub Actions cache credentials to Docker
+        uses: crazy-max/ghaction-github-runtime@v3
+
+      - name: Build Docker images
+        run: >-
+          npx nx affected -t docker-build -c ci
+          --gitCommit=${{ github.sha }}
+          --tag=${{ github.sha }}
+          --buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
       - name: Log in to Docker Hub
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Push Docker images
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: npx nx affected -t docker-push --tag=${{ github.sha }} --username=${{ vars.DOCKERHUB_USERNAME }}
+
+      - name: Do cleanup for CI
+        run: npx nx fix-ci
+        if: always()
