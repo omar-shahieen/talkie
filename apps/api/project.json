@@ -5,10 +5,26 @@
     "docker-build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "docker build -f apps/api/Dockerfile --build-arg GIT_COMMIT={args.gitCommit} --build-arg BUILD_DATE={args.buildDate} -t talkie-api:{args.tag} .",
+        "command": "docker build -f apps/api/Dockerfile --build-arg GIT_COMMIT={args.gitCommit} --build-arg BUILD_DATE={args.buildDate} -t {args.username}/talkie-api:{args.tag} .",
         "cwd": "{workspaceRoot}",
         "gitCommit": "local-dev",
         "buildDate": "unknown",
+        "tag": "latest",
+        "username": "omarmohamed04"
+      },
+      "cache": false,
+      "configurations": {
+        "ci": {
+          "command": "docker buildx build --load --cache-from type=gha,scope=talkie-api --cache-to type=gha,mode=max,scope=talkie-api -f apps/api/Dockerfile --build-arg GIT_COMMIT={args.gitCommit} --build-arg BUILD_DATE={args.buildDate} -t {args.username}/talkie-api:{args.tag} ."
+        }
+      }
+    },
+    "docker-push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker tag {args.username}/talkie-api:{args.tag} {args.username}/talkie-api:latest && docker push {args.username}/talkie-api:{args.tag} && docker push {args.username}/talkie-api:latest",
+        "cwd": "{workspaceRoot}",
+        "username": "omarmohamed04",
         "tag": "latest"
       },
       "cache": false

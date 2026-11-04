@@ -5,10 +5,26 @@
     "docker-build": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "docker build -f apps/frontend/Dockerfile --build-arg GIT_COMMIT={args.gitCommit} --build-arg BUILD_DATE={args.buildDate} -t talkie-frontend:{args.tag} .",
+        "command": "docker build -f apps/frontend/Dockerfile --build-arg GIT_COMMIT={args.gitCommit} --build-arg BUILD_DATE={args.buildDate} -t {args.username}/talkie-frontend:{args.tag} .",
         "cwd": "{workspaceRoot}",
         "gitCommit": "local-dev",
         "buildDate": "unknown",
+        "tag": "latest",
+        "username": "omarmohamed04"
+      },
+      "cache": false,
+      "configurations": {
+        "ci": {
+          "command": "docker buildx build --load --cache-from type=gha,scope=talkie-frontend --cache-to type=gha,mode=max,scope=talkie-frontend -f apps/frontend/Dockerfile --build-arg GIT_COMMIT={args.gitCommit} --build-arg BUILD_DATE={args.buildDate} -t {args.username}/talkie-frontend:{args.tag} ."
+        }
+      }
+    },
+    "docker-push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker tag {args.username}/talkie-frontend:{args.tag} {args.username}/talkie-frontend:latest && docker push {args.username}/talkie-frontend:{args.tag} && docker push {args.username}/talkie-frontend:latest",
+        "cwd": "{workspaceRoot}",
+        "username": "omarmohamed04",
         "tag": "latest"
       },
       "cache": false
