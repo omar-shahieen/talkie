@@ -61,7 +61,7 @@ export async function registerAndLogin(
 ): Promise<TestUserSession> {
   const rand = generateRandomString(prefix);
   const email = `${rand}@example.com`;
-  const username = rand.replace(/[^a-zA-Z0-9]/g, '').slice(0, 18);
+  const username = rand.replace(/[^a-zA-Z0-9_]/g, '');
   const rawPassword = 'Password123!';
 
   // 1. Sign up

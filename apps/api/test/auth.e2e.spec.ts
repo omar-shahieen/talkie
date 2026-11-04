@@ -21,7 +21,7 @@ describe('Auth Endpoints (e2e)', () => {
     it('should register a new user successfully', async () => {
       const rand = generateRandomString('signup');
       const email = `${rand}@example.com`;
-      const username = rand.slice(0, 18);
+      const username = rand;
 
       const res = await request(app.getHttpServer())
         .post('/auth/signup')
@@ -45,7 +45,7 @@ describe('Auth Endpoints (e2e)', () => {
     it('should reject registration if email is already taken', async () => {
       const rand = generateRandomString('dupsignup');
       const email = `${rand}@example.com`;
-      const username = rand.slice(0, 18);
+      const username = rand;
 
       // First signup
       await request(app.getHttpServer())
@@ -81,7 +81,7 @@ describe('Auth Endpoints (e2e)', () => {
         .send({
           firstName: 'Charlie',
           email: `${rand}@example.com`,
-          username: rand.slice(0, 18),
+          username: rand,
           password: 'Password123!',
           passwordConfirm: 'DifferentPass123!',
         })
@@ -97,7 +97,7 @@ describe('Auth Endpoints (e2e)', () => {
         .send({
           firstName: 'Short',
           email: `${rand}@example.com`,
-          username: rand.slice(0, 18),
+          username: rand,
           password: '123',
           passwordConfirm: '123',
         })
@@ -111,7 +111,7 @@ describe('Auth Endpoints (e2e)', () => {
     it('should login with valid credentials and return access_token and refresh cookie', async () => {
       const rand = generateRandomString('login');
       const email = `${rand}@example.com`;
-      const username = rand.slice(0, 18);
+      const username = rand;
       const password = 'Password123!';
 
       await request(app.getHttpServer())

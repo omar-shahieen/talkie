@@ -38,7 +38,7 @@ export class User {
   @Column({ nullable: true, select: false, unique: true })
   googleId?: string;
 
-  @Column({ nullable: true, select: false, unique: true })
+  @Column({ type: 'varchar', nullable: true, select: false, unique: true })
   currentJwtToken?: string | null;
 
   @Column({ default: false })
