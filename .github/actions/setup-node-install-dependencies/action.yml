@@ -1,0 +1,26 @@
+name: Setup Node Environment
+description: Setup Node and install dependencies
+
+inputs:
+  node-version:
+    description: Node.js version
+    required: false
+    default: "24"
+
+  cache:
+    description: Package manager cache
+    required: false
+    default: "npm"
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: ${{ inputs.cache }}
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci

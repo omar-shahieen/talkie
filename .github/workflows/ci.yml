@@ -16,18 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          filter: tree:0
-          fetch-depth: 0
+        uses: ./.github/actions/checkout
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: "npm"
-      - name: Install dependencies
-        run: npm ci
+      - name: Setup Node.js Environment and install dependencies
+        uses: ./.github/actions/setup-node-install-dependencies
 
       - name: Derive appropriate SHAs for base and head for `nx affected` commands
         uses: nrwl/nx-set-shas@v5
@@ -43,18 +35,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          filter: tree:0
-          fetch-depth: 0
+        uses: ./.github/actions/checkout
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: "npm"
-      - name: Install dependencies
-        run: npm ci
+      - name: Setup Node.js Environment and install dependencies
+        uses: ./.github/actions/setup-node-install-dependencies
 
       - name: Derive appropriate SHAs for base and head for `nx affected` commands
         uses: nrwl/nx-set-shas@v5
@@ -68,22 +52,14 @@ jobs:
 
   build:
     name: Build
+    needs: [quality, unit-test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          filter: tree:0
-          fetch-depth: 0
+        uses: ./.github/actions/checkout
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
+      - name: Setup Node.js Environment and install dependencies
+        uses: ./.github/actions/setup-node-install-dependencies
 
       - name: Derive appropriate SHAs for base and head for `nx affected` commands
         uses: nrwl/nx-set-shas@v5
@@ -92,8 +68,11 @@ jobs:
         run: npx nx affected -t build
 
       - name: Build Docker images
-        run: |
-          docker build -t my-app:${{ github.sha }} .
+        run: >-
+          npx nx affected -t docker-build
+          --gitCommit=${{ github.sha }}
+          --tag=${{ github.sha }}
+          --buildDate=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

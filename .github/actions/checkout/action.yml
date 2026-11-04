@@ -1,0 +1,22 @@
+name: Checkout Repository
+description: Checkout repository with optimized Git settings
+
+inputs:
+  fetch-depth:
+    description: Number of commits to fetch. 0 fetches all history.
+    required: false
+    default: "0"
+
+  filter:
+    description: Git partial clone filter
+    required: false
+    default: "tree:0"
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+      with:
+        filter: ${{ inputs.filter }}
+        fetch-depth: ${{ inputs.fetch-depth }}

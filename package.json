@@ -31,7 +31,10 @@
     "migration:create": "npm --workspace=@talkie/api run migration:create --",
     "migration:run": "nx run @talkie/api:migration:run",
     "migration:revert": "nx run @talkie/api:migration:revert",
-    "migration:status": "nx run @talkie/api:migration:status"
+    "migration:status": "nx run @talkie/api:migration:status",
+    "docker:build": "nx run-many -t docker-build",
+    "docker:build:api": "nx run @talkie/api:docker-build",
+    "docker:build:frontend": "nx run @talkie/frontend:docker-build"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
