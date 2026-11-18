@@ -1,11 +1,10 @@
-import { ChevronRightIcon } from '@chakra-ui/icons';
-import { Box, Text } from '@chakra-ui/react';
+import { ChevronDownIcon } from '@chakra-ui/icons';
+import { Box, HStack, Text } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import AppChannelListItem from './AppChannelListItem';
 import { fetchVisibleChannelsByServer } from '../../app/services/channel.service';
 import { useAuth } from '../../hooks/useAuth';
-
 import { useThemedColors } from '../theme/colors';
 
 type AppCategoryChannelListProps = {
@@ -19,6 +18,7 @@ export default function AppCategoryChannelList({
   const [channels, setChannels] = useState<any[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
+  const { channelId: activeChannelId } = useParams<{ channelId?: string }>();
   const user = useAuth();
 
   useEffect(() => {
@@ -62,31 +62,40 @@ export default function AppCategoryChannelList({
   };
 
   return (
-    <Box marginY="5px">
-      <Text
-        color={colors.white}
-        fontSize="xs"
-        fontWeight="bold"
-        marginBottom="5px"
-      >
-        <ChevronRightIcon /> {serverName.toUpperCase()}
-      </Text>
+    <Box>
+      <HStack spacing="4px" paddingX="8px" marginBottom="6px">
+        <ChevronDownIcon boxSize={3} color={colors.textMuted} />
+        <Text
+          color={colors.textMuted}
+          fontSize="11px"
+          fontWeight="700"
+          letterSpacing="0.06em"
+          textTransform="uppercase"
+          isTruncated
+        >
+          {serverName}
+        </Text>
+      </HStack>
+
       {errorMessage ? (
-        <Text color="red.300" fontSize="xs" marginBottom="6px">
+        <Text color="red.400" fontSize="xs" paddingX="8px" marginBottom="6px">
           {errorMessage}
         </Text>
       ) : null}
+
       {channels.length ? (
         channels.map((channel, idx) => (
           <AppChannelListItem
             key={channel.id || idx}
-            label={`${channel.icon || '#'}-${channel.name || `channel-${idx}`}`}
-            active={idx === 0}
+            label={`${channel.icon ? `${channel.icon} ` : ''}${channel.name || `channel-${idx}`}`}
+            active={
+              activeChannelId ? channel.id === activeChannelId : idx === 0
+            }
             onClick={() => handleChannelClick(channel.id)}
           />
         ))
       ) : (
-        <Text color={colors.textMuted} fontSize="xs" paddingLeft="20px">
+        <Text color={colors.textMuted} fontSize="xs" paddingLeft="14px">
           No channels
         </Text>
       )}

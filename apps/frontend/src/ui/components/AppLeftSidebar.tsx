@@ -8,7 +8,6 @@ import {
   Avatar,
   Box,
   Button,
-  Center,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -18,6 +17,7 @@ import {
   HStack,
   Menu,
   MenuButton,
+  MenuDivider,
   MenuItem,
   MenuList,
   Text,
@@ -32,27 +32,23 @@ import { useThemedColors } from '../theme/colors';
 import AppCategoryList from './AppCategoryList';
 import AppIconButton from './AppIconButton';
 import { logoutApi } from '../../app/services/auth-api.service';
-import talkieLogo from '../../logo.svg';
 
-function useBrandLogo(defaultSvg: string) {
-  // Prefer the raster logo placed in public at runtime.
-  return '/talkie-logo.png';
-}
-
-function LogoAvatar(props: { size?: any }) {
-  const logo = useBrandLogo(talkieLogo);
-  return <Avatar src={logo} name="Talkie" {...props} />;
+function LogoAvatar(props: { size?: any; borderRadius?: string }) {
+  return <Avatar src="/talkie-logo.png" name="Talkie" {...props} />;
 }
 
 export default function AppLeftSidebar() {
   const colors = useThemedColors();
   return (
     <Box
-      width="300px"
+      width="260px"
+      minWidth="260px"
       display="flex"
       flexDirection="column"
       justifyContent="space-between"
       backgroundColor={colors.grayMedium}
+      borderRight="1px solid"
+      borderColor={colors.border}
     >
       <AppLeftSidebarTopbar />
 
@@ -70,56 +66,104 @@ function AppLeftSidebarTopbar() {
 
   return (
     <Box
-      height="50px"
+      height="56px"
+      minHeight="56px"
       display="flex"
-      justifyContent="center"
+      justifyContent="space-between"
       alignItems="center"
-      paddingX="5px"
+      paddingX="12px"
       backgroundColor={colors.grayMedium}
-      borderBottomColor="gray"
-      borderBottomWidth="1px"
+      borderBottom="1px solid"
+      borderColor={colors.border}
     >
       <Menu>
         <MenuButton
           as={Button}
-          color={colors.dark}
+          color={colors.white}
           width="full"
+          height="38px"
+          px="10px"
+          borderRadius="10px"
           backgroundColor="transparent"
-          rightIcon={<ChevronDownIcon />}
-          _hover={{ background: 'none' }}
-          _active={{ background: 'none' }}
+          rightIcon={<ChevronDownIcon color={colors.textDim} />}
+          _hover={{ backgroundColor: colors.darkLight }}
+          _active={{ backgroundColor: colors.darkLight }}
+          fontWeight="600"
+          fontSize="sm"
         >
-          <HStack maxW="225px" spacing="8px">
-            <LogoAvatar size="xs" />
-            <Text isTruncated>Talkie</Text>
+          <HStack spacing="10px">
+            <LogoAvatar size="xs" borderRadius="6px" />
+            <Text isTruncated letterSpacing="-0.01em">
+              Talkie Workspace
+            </Text>
           </HStack>
         </MenuButton>
-        <MenuList>
+        <MenuList
+          backgroundColor={colors.surfaceElevated}
+          borderColor={colors.border}
+        >
           {!user ? (
             <>
-              <MenuItem onClick={() => navigate('/login')}>Sign In</MenuItem>
-              <MenuItem onClick={() => navigate('/login?mode=signup')}>
+              <MenuItem
+                backgroundColor="transparent"
+                _hover={{ backgroundColor: colors.darkLight }}
+                onClick={() => navigate('/login')}
+              >
+                Sign In
+              </MenuItem>
+              <MenuItem
+                backgroundColor="transparent"
+                _hover={{ backgroundColor: colors.darkLight }}
+                onClick={() => navigate('/login?mode=signup')}
+              >
                 Sign Up
               </MenuItem>
             </>
           ) : (
-            <MenuItem
-              onClick={async () => {
-                await logoutApi().catch(() => {});
-                disconnectSockets();
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                navigate('/login', { replace: true });
-                window.location.reload();
-              }}
-            >
-              Logout
-            </MenuItem>
+            <>
+              <MenuItem
+                backgroundColor="transparent"
+                _hover={{ backgroundColor: colors.darkLight }}
+                onClick={() => navigate('/settings')}
+              >
+                Workspace & Account Settings
+              </MenuItem>
+              <MenuDivider borderColor={colors.border} />
+              <MenuItem
+                backgroundColor="transparent"
+                color="red.400"
+                _hover={{ backgroundColor: 'rgba(244, 63, 94, 0.14)' }}
+                onClick={async () => {
+                  await logoutApi().catch(() => {});
+                  disconnectSockets();
+                  localStorage.removeItem('access_token');
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('user');
+                  navigate('/login', { replace: true });
+                  window.location.reload();
+                }}
+              >
+                Logout
+              </MenuItem>
+            </>
           )}
         </MenuList>
       </Menu>
     </Box>
+  );
+}
+
+function StatusDot({ color }: { color: string }) {
+  return (
+    <Box
+      as="span"
+      display="inline-block"
+      width="8px"
+      height="8px"
+      borderRadius="full"
+      backgroundColor={color}
+      flexShrink={0}
+    />
   );
 }
 
@@ -165,108 +209,147 @@ function BottomSection() {
   }
 
   const statusColors: Record<string, string> = {
-    online: '#43b581',
-    dnd: '#f04747',
-    idle: '#faa61a',
-    offline: '#747f8d',
+    online: '#10B981',
+    dnd: '#F43F5E',
+    idle: '#F59E0B',
+    offline: '#6B7280',
   };
 
-  const statusEmoji: Record<string, string> = {
-    online: '🟢',
-    dnd: '🔴',
-    idle: '🟡',
-    offline: '⚫',
+  const statusLabels: Record<string, string> = {
+    online: 'Online',
+    dnd: 'Do Not Disturb',
+    idle: 'Away',
+    offline: 'Offline',
   };
 
   return (
     <Box
-      paddingY="12px"
-      paddingX="5px"
+      padding="10px 12px"
       display="flex"
-      justifyContent="center"
+      justifyContent="space-between"
       alignItems="center"
       backgroundColor={colors.grayDark}
+      borderTop="1px solid"
+      borderColor={colors.border}
     >
-      <Center>
-        <LogoAvatar size="sm" />
-      </Center>
-      <Box marginX="10px">
-        <Text color={colors.white} maxW="100px" fontSize="sm" isTruncated>
-          {user?.email ?? 'Guest'}
-        </Text>
+      <HStack spacing="10px" minWidth={0} flex="1">
+        <Box position="relative" flexShrink={0}>
+          <LogoAvatar size="sm" />
+          <Box
+            position="absolute"
+            bottom="0"
+            right="0"
+            width="10px"
+            height="10px"
+            borderRadius="full"
+            backgroundColor={statusColors[presenceStatus]}
+            border="2px solid"
+            borderColor={colors.grayDark}
+          />
+        </Box>
+        <Box minWidth={0}>
+          <Text
+            color={colors.white}
+            fontSize="xs"
+            fontWeight="600"
+            isTruncated
+          >
+            {user?.name || user?.email || 'Guest'}
+          </Text>
+          <HStack spacing="5px">
+            <Text color={colors.textMuted} fontSize="11px" isTruncated>
+              {statusLabels[presenceStatus]}
+            </Text>
+          </HStack>
+        </Box>
+      </HStack>
 
-        <Text color={colors.lightGray} fontSize="xs">
-          {statusEmoji[presenceStatus]} {presenceStatus}
-        </Text>
-      </Box>
-      <HStack>
+      <HStack spacing="2px" flexShrink={0}>
         <AppIconButton
           ariaLabel="Open info"
           tooltip="Info"
-          icon={<InfoOutlineIcon />}
+          icon={<InfoOutlineIcon boxSize={3.5} />}
           onClick={onInfoOpen}
-        ></AppIconButton>
+        />
         <AppIconButton
-          ariaLabel="To other"
-          tooltip="Other"
-          icon={<RepeatIcon />}
+          ariaLabel="Switch channel"
+          tooltip="Switch Channel"
+          icon={<RepeatIcon boxSize={3.5} />}
           onClick={toOther}
-        ></AppIconButton>
+        />
         <AppIconButton
           ariaLabel="Settings"
           tooltip="Settings"
-          icon={<SettingsIcon />}
+          icon={<SettingsIcon boxSize={3.5} />}
           onClick={toSettingsView}
-        ></AppIconButton>
-        <Menu>
+        />
+        <Menu placement="top-end">
           <MenuButton
             as={Button}
             backgroundColor="transparent"
-            color={colors.dark}
+            color={colors.textDim}
             padding="0"
-            minWidth="auto"
-            height="auto"
-            _hover={{ background: 'none' }}
-            _active={{ background: 'none' }}
+            minWidth="24px"
+            height="28px"
+            borderRadius="8px"
+            _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+            _active={{ backgroundColor: colors.darkLight }}
           >
             <ChevronDownIcon />
           </MenuButton>
-          <MenuList bg={colors.darkMedium} border="none">
+          <MenuList
+            bg={colors.surfaceElevated}
+            border="1px solid"
+            borderColor={colors.border}
+          >
             <MenuItem
-              bg={colors.darkMedium}
-              _hover={{ bg: 'gray.600' }}
+              bg="transparent"
+              _hover={{ bg: colors.darkLight }}
               onClick={() => setPresence('online')}
             >
-              🟢 Online
+              <HStack spacing="8px">
+                <StatusDot color={statusColors.online} />
+                <Text>Online</Text>
+              </HStack>
             </MenuItem>
             <MenuItem
-              bg={colors.darkMedium}
-              _hover={{ bg: 'gray.600' }}
+              bg="transparent"
+              _hover={{ bg: colors.darkLight }}
               onClick={() => setPresence('dnd')}
             >
-              🔴 Do Not Disturb
+              <HStack spacing="8px">
+                <StatusDot color={statusColors.dnd} />
+                <Text>Do Not Disturb</Text>
+              </HStack>
             </MenuItem>
             <MenuItem
-              bg={colors.darkMedium}
-              _hover={{ bg: 'gray.600' }}
+              bg="transparent"
+              _hover={{ bg: colors.darkLight }}
               onClick={() => setPresence('idle')}
             >
-              🟡 Away
+              <HStack spacing="8px">
+                <StatusDot color={statusColors.idle} />
+                <Text>Away</Text>
+              </HStack>
             </MenuItem>
             <MenuItem
-              bg={colors.darkMedium}
-              _hover={{ bg: 'gray.600' }}
+              bg="transparent"
+              _hover={{ bg: colors.darkLight }}
               onClick={() => setPresence('offline')}
             >
-              ⚫ Offline
+              <HStack spacing="8px">
+                <StatusDot color={statusColors.offline} />
+                <Text>Offline</Text>
+              </HStack>
             </MenuItem>
+            <MenuDivider borderColor={colors.border} />
             <MenuItem
-              bg={colors.darkMedium}
-              _hover={{ bg: 'gray.600' }}
+              bg="transparent"
+              _hover={{ bg: 'rgba(244, 63, 94, 0.14)' }}
               onClick={logout}
-              color="red.300"
+              color="red.400"
             >
-              🚪 Logout
+              Logout
             </MenuItem>
           </MenuList>
         </Menu>
@@ -274,14 +357,19 @@ function BottomSection() {
 
       <Modal isOpen={isInfoOpen} onClose={onInfoClose} isCentered size="sm">
         <ModalOverlay />
-        <ModalContent backgroundColor={colors.grayLight} color={colors.dark}>
-          <ModalHeader>Talkie Info</ModalHeader>
+        <ModalContent
+          backgroundColor={colors.surfaceElevated}
+          color={colors.white}
+          border="1px solid"
+          borderColor={colors.border}
+        >
+          <ModalHeader fontSize="md">About Talkie</ModalHeader>
           <ModalCloseButton />
-          <ModalBody paddingBottom="20px">
-            <Text fontSize="sm" color={colors.lightGray}>
-              This button opens a quick info panel. You can use the gear for
-              settings, the refresh icon for the related action, and the dot
-              menu for presence and logout.
+          <ModalBody paddingBottom="24px">
+            <Text fontSize="sm" color={colors.textDim} lineHeight="1.6">
+              Real-time team collaboration & messaging. Use the gear icon for
+              account and server settings, or the status menu to update your
+              presence.
             </Text>
           </ModalBody>
         </ModalContent>

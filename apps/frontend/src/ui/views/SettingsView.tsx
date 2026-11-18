@@ -1,5 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
+import {
+  Badge,
+  Box,
+  Button,
+  Checkbox,
+  Code,
+  FormControl,
+  FormLabel,
+  Heading,
+  HStack,
+  Input,
+  SimpleGrid,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
+import { useThemedColors } from '../theme/colors';
 import {
   changePassword as changePasswordRequest,
   initiateTfa as initiateTfaRequest,
@@ -542,444 +558,770 @@ function SettingsView() {
     }
   }
 
+  const colors = useThemedColors();
   const isAdmin = getCurrentUser()?.appRole === 'admin';
 
+  const cardProps = {
+    backgroundColor: colors.surfaceElevated,
+    border: '1px solid',
+    borderColor: colors.border,
+    borderRadius: '12px',
+    padding: '20px',
+  };
+
+  const inputProps = {
+    size: 'sm' as const,
+    backgroundColor: colors.darkLight,
+    borderColor: colors.border,
+    borderRadius: '8px',
+    color: colors.white,
+    _placeholder: { color: colors.textMuted },
+  };
+
   return (
-    <>
-      <h1>Settings View</h1>
-      {isAdmin ? (
-        <p>
-          <Link to="/settings/admin">Open Admin Management</Link>
-        </p>
-      ) : null}
+    <VStack align="stretch" spacing="24px" paddingBottom="48px">
+      <HStack justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap="12px">
+        <Box>
+          <Heading size="md" color={colors.white} letterSpacing="-0.02em" mb="4px">
+            Account & Workspace Settings
+          </Heading>
+          <Text fontSize="xs" color={colors.textDim}>
+            Manage security credentials, workspaces, channels, directory connections, and invitations.
+          </Text>
+        </Box>
+        {isAdmin ? (
+          <Button
+            as={RouterLink}
+            to="/settings/admin"
+            size="sm"
+            variant="outline"
+            borderColor={colors.borderStrong}
+            color={colors.white}
+            _hover={{ backgroundColor: colors.darkLight }}
+          >
+            Open Admin Console
+          </Button>
+        ) : null}
+      </HStack>
 
-      <h2>Change Password</h2>
-      <div style={{ marginBottom: '16px', maxWidth: '420px' }}>
-        <input
-          type="password"
-          placeholder="Current password"
-          value={oldPassword}
-          onChange={(event) => setOldPassword(event.target.value)}
-          style={{
-            display: 'block',
-            width: '100%',
-            marginBottom: '8px',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <input
-          type="password"
-          placeholder="New password"
-          value={newPassword}
-          onChange={(event) => setNewPassword(event.target.value)}
-          style={{
-            display: 'block',
-            width: '100%',
-            marginBottom: '8px',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <input
-          type="password"
-          placeholder="Confirm new password"
-          value={newPasswordConfirm}
-          onChange={(event) => setNewPasswordConfirm(event.target.value)}
-          style={{
-            display: 'block',
-            width: '100%',
-            marginBottom: '8px',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <button onClick={changePassword} disabled={isChangingPassword}>
-          Update Password
-        </button>
-        {changePasswordStatus ? <p>{changePasswordStatus}</p> : null}
-      </div>
+      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing="16px">
+        {/* Password Card */}
+        <Box {...cardProps}>
+          <Text fontSize="sm" fontWeight="600" color={colors.white} mb="2px">
+            Change Password
+          </Text>
+          <Text fontSize="xs" color={colors.textMuted} mb="16px">
+            Update your account password to keep your session secure.
+          </Text>
+          <VStack spacing="10px" align="stretch">
+            <FormControl>
+              <FormLabel fontSize="xs" color={colors.textDim} mb="4px">
+                Current Password
+              </FormLabel>
+              <Input
+                {...inputProps}
+                type="password"
+                placeholder="Current password"
+                value={oldPassword}
+                onChange={(event) => setOldPassword(event.target.value)}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel fontSize="xs" color={colors.textDim} mb="4px">
+                New Password
+              </FormLabel>
+              <Input
+                {...inputProps}
+                type="password"
+                placeholder="New password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel fontSize="xs" color={colors.textDim} mb="4px">
+                Confirm New Password
+              </FormLabel>
+              <Input
+                {...inputProps}
+                type="password"
+                placeholder="Confirm new password"
+                value={newPasswordConfirm}
+                onChange={(event) => setNewPasswordConfirm(event.target.value)}
+              />
+            </FormControl>
+            <Box pt="4px">
+              <Button
+                size="sm"
+                backgroundColor={colors.accent}
+                color="white"
+                _hover={{ backgroundColor: colors.accentHover }}
+                onClick={changePassword}
+                isLoading={isChangingPassword}
+              >
+                Update Password
+              </Button>
+            </Box>
+            {changePasswordStatus ? (
+              <Text fontSize="xs" color={colors.accent}>
+                {changePasswordStatus}
+              </Text>
+            ) : null}
+          </VStack>
+        </Box>
 
-      <h2>TFA</h2>
-      <div style={{ marginBottom: '16px', maxWidth: '420px' }}>
-        <button
-          onClick={initiateTfa}
-          style={{ display: 'block', marginBottom: '8px' }}
-        >
-          Start TFA Setup
-        </button>
-        <input
-          type="text"
-          placeholder="6-digit TFA code"
-          value={tfaToken}
-          onChange={(event) => setTfaToken(event.target.value)}
-          style={{
-            display: 'block',
-            width: '100%',
-            marginBottom: '8px',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <button
-          onClick={() => verifyTfa('enable')}
-          style={{ marginRight: '8px' }}
-        >
-          Enable TFA
-        </button>
-        <button onClick={() => verifyTfa('disable')}>Disable TFA</button>
-        {tfaUri ? <pre>{tfaUri}</pre> : null}
-        {tfaStatus ? <p>{tfaStatus}</p> : null}
-      </div>
+        {/* Two-Factor Authentication Card */}
+        <Box {...cardProps}>
+          <HStack justifyContent="space-between" mb="2px">
+            <Text fontSize="sm" fontWeight="600" color={colors.white}>
+              Two-Factor Authentication (TFA)
+            </Text>
+            <Badge
+              fontSize="10px"
+              borderRadius="4px"
+              backgroundColor={colors.accentSoft}
+              color={colors.accent}
+            >
+              TOTP
+            </Badge>
+          </HStack>
+          <Text fontSize="xs" color={colors.textMuted} mb="16px">
+            Protect your account with an authenticator app verification code.
+          </Text>
+          <VStack spacing="12px" align="stretch">
+            <Box>
+              <Button
+                size="xs"
+                variant="outline"
+                borderColor={colors.borderStrong}
+                color={colors.white}
+                _hover={{ backgroundColor: colors.darkLight }}
+                onClick={initiateTfa}
+              >
+                Generate Setup Key
+              </Button>
+            </Box>
+            <FormControl>
+              <FormLabel fontSize="xs" color={colors.textDim} mb="4px">
+                Verification Code
+              </FormLabel>
+              <Input
+                {...inputProps}
+                type="text"
+                placeholder="6-digit TFA code"
+                value={tfaToken}
+                onChange={(event) => setTfaToken(event.target.value)}
+              />
+            </FormControl>
+            <HStack spacing="8px">
+              <Button
+                size="sm"
+                backgroundColor={colors.accent}
+                color="white"
+                _hover={{ backgroundColor: colors.accentHover }}
+                onClick={() => verifyTfa('enable')}
+              >
+                Enable TFA
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor={colors.border}
+                color={colors.textDim}
+                _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                onClick={() => verifyTfa('disable')}
+              >
+                Disable TFA
+              </Button>
+            </HStack>
+            {tfaUri ? (
+              <Code
+                p="8px"
+                borderRadius="6px"
+                fontSize="11px"
+                backgroundColor={colors.grayDarkest}
+                color={colors.textDim}
+                wordBreak="break-all"
+              >
+                {tfaUri}
+              </Code>
+            ) : null}
+            {tfaStatus ? (
+              <Text fontSize="xs" color={colors.accent}>
+                {tfaStatus}
+              </Text>
+            ) : null}
+          </VStack>
+        </Box>
+      </SimpleGrid>
 
-      <h2>Servers</h2>
-      <div style={{ marginBottom: '16px', maxWidth: '420px' }}>
-        <input
-          type="text"
-          placeholder="Server name"
-          value={newServerName}
-          onChange={(event) => setNewServerName(event.target.value)}
-          style={{
-            display: 'block',
-            width: '100%',
-            marginBottom: '8px',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <label style={{ display: 'block', marginBottom: '8px' }}>
-          <input
-            type="checkbox"
-            checked={newServerPublic}
+      {/* Workspaces / Servers Section */}
+      <Box {...cardProps}>
+        <Text fontSize="sm" fontWeight="600" color={colors.white} mb="2px">
+          Workspaces & Servers
+        </Text>
+        <Text fontSize="xs" color={colors.textMuted} mb="16px">
+          Create new workspaces or manage existing server memberships.
+        </Text>
+
+        <HStack spacing="10px" mb="16px" alignItems="center" flexWrap="wrap">
+          <Input
+            {...inputProps}
+            maxW="280px"
+            placeholder="New workspace name"
+            value={newServerName}
+            onChange={(event) => setNewServerName(event.target.value)}
+          />
+          <Checkbox
+            size="sm"
+            colorScheme="purple"
+            isChecked={newServerPublic}
             onChange={(event) => setNewServerPublic(event.target.checked)}
-          />{' '}
-          Public server
-        </label>
-        <button onClick={createServer} disabled={isCreatingServer}>
-          Create Server
-        </button>
-        {createServerStatus ? <p>{createServerStatus}</p> : null}
-      </div>
+          >
+            <Text fontSize="xs" color={colors.textDim}>
+              Public workspace
+            </Text>
+          </Checkbox>
+          <Button
+            size="sm"
+            backgroundColor={colors.accent}
+            color="white"
+            _hover={{ backgroundColor: colors.accentHover }}
+            onClick={createServer}
+            isLoading={isCreatingServer}
+          >
+            Create Server
+          </Button>
+        </HStack>
+        {createServerStatus ? (
+          <Text fontSize="xs" color={colors.accent} mb="12px">
+            {createServerStatus}
+          </Text>
+        ) : null}
 
-      <div style={{ marginBottom: '16px' }}>
         {(servers ?? []).length ? (
-          (servers ?? []).map((server) => (
-            <div
-              key={server.id}
-              style={{
-                marginBottom: '12px',
-                padding: '12px',
-                border: '1px solid #444',
-                borderRadius: '8px',
-              }}
-            >
-              <div>{server.name ?? server.id}</div>
-              <button onClick={() => renameServer(server.id)}>
-                Rename Server
-              </button>
-              <button onClick={() => leaveServer(server.id)}>
-                Leave Server
-              </button>
-              {server.ownerId === getCurrentUserId() ? (
-                <button onClick={() => deleteServer(server.id)}>
-                  Delete Server
-                </button>
-              ) : null}
-            </div>
-          ))
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing="10px">
+            {(servers ?? []).map((server) => (
+              <Box
+                key={server.id}
+                padding="12px 14px"
+                borderRadius="8px"
+                backgroundColor={colors.grayLight}
+                border="1px solid"
+                borderColor={colors.border}
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                gap="8px"
+              >
+                <Box minW={0}>
+                  <Text fontSize="xs" fontWeight="600" color={colors.white} isTruncated>
+                    {server.name ?? server.id}
+                  </Text>
+                  <Text fontSize="11px" color={colors.textMuted} isTruncated>
+                    ID: {server.id}
+                  </Text>
+                </Box>
+                <HStack spacing="6px" flexShrink={0}>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    borderColor={colors.border}
+                    color={colors.textDim}
+                    _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                    onClick={() => renameServer(server.id)}
+                  >
+                    Rename
+                  </Button>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    borderColor={colors.border}
+                    color={colors.textDim}
+                    _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                    onClick={() => leaveServer(server.id)}
+                  >
+                    Leave
+                  </Button>
+                  {server.ownerId === getCurrentUserId() ? (
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      borderColor="rgba(225, 29, 72, 0.35)"
+                      color="red.400"
+                      _hover={{ backgroundColor: 'rgba(225, 29, 72, 0.14)' }}
+                      onClick={() => deleteServer(server.id)}
+                    >
+                      Delete
+                    </Button>
+                  ) : null}
+                </HStack>
+              </Box>
+            ))}
+          </SimpleGrid>
         ) : (
-          <pre>{JSON.stringify(servers, null, 2)}</pre>
+          <Text fontSize="xs" color={colors.textMuted}>
+            No workspaces available.
+          </Text>
         )}
-      </div>
+      </Box>
 
-      <h2>Channels</h2>
-      <div style={{ marginBottom: '16px', maxWidth: '420px' }}>
-        <input
-          type="text"
-          placeholder="Channel name"
-          value={newChannelName}
-          onChange={(event) => setNewChannelName(event.target.value)}
-          style={{
-            display: 'block',
-            width: '100%',
-            marginBottom: '8px',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <input
-          type="text"
-          placeholder="Server id"
-          value={newChannelServerId}
-          onChange={(event) => setNewChannelServerId(event.target.value)}
-          style={{
-            display: 'block',
-            width: '100%',
-            marginBottom: '8px',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <button onClick={createChannel} disabled={isCreatingChannel}>
-          Create Channel
-        </button>
-        {createChannelStatus ? <p>{createChannelStatus}</p> : null}
-      </div>
+      {/* Channels Section */}
+      <Box {...cardProps}>
+        <Text fontSize="sm" fontWeight="600" color={colors.white} mb="2px">
+          Channels
+        </Text>
+        <Text fontSize="xs" color={colors.textMuted} mb="16px">
+          Provision and manage channels across your workspaces.
+        </Text>
 
-      <div style={{ marginBottom: '16px' }}>
+        <HStack spacing="10px" mb="16px" flexWrap="wrap">
+          <Input
+            {...inputProps}
+            maxW="220px"
+            placeholder="Channel name"
+            value={newChannelName}
+            onChange={(event) => setNewChannelName(event.target.value)}
+          />
+          <Input
+            {...inputProps}
+            maxW="240px"
+            placeholder="Target server ID"
+            value={newChannelServerId}
+            onChange={(event) => setNewChannelServerId(event.target.value)}
+          />
+          <Button
+            size="sm"
+            backgroundColor={colors.accent}
+            color="white"
+            _hover={{ backgroundColor: colors.accentHover }}
+            onClick={createChannel}
+            isLoading={isCreatingChannel}
+          >
+            Create Channel
+          </Button>
+        </HStack>
+        {createChannelStatus ? (
+          <Text fontSize="xs" color={colors.accent} mb="12px">
+            {createChannelStatus}
+          </Text>
+        ) : null}
+
         {(channels ?? []).length ? (
-          (channels ?? []).map((channel) => (
-            <div
-              key={channel.id}
-              style={{
-                marginBottom: '12px',
-                padding: '12px',
-                border: '1px solid #444',
-                borderRadius: '8px',
-              }}
-            >
-              <div>{channel.name ?? channel.id}</div>
-              <button onClick={() => renameChannel(channel.id)}>
-                Rename Channel
-              </button>
-              <button onClick={() => deleteChannel(channel.id)}>
-                Delete Channel
-              </button>
-            </div>
-          ))
+          <SimpleGrid columns={{ base: 1, md: 2 }} spacing="10px">
+            {(channels ?? []).map((channel) => (
+              <Box
+                key={channel.id}
+                padding="10px 14px"
+                borderRadius="8px"
+                backgroundColor={colors.grayLight}
+                border="1px solid"
+                borderColor={colors.border}
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <HStack spacing="6px" minW={0}>
+                  <Text color={colors.textMuted} fontSize="xs" fontWeight="600">
+                    #
+                  </Text>
+                  <Text fontSize="xs" fontWeight="500" color={colors.white} isTruncated>
+                    {channel.name ?? channel.id}
+                  </Text>
+                </HStack>
+                <HStack spacing="6px" flexShrink={0}>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    borderColor={colors.border}
+                    color={colors.textDim}
+                    _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                    onClick={() => renameChannel(channel.id)}
+                  >
+                    Rename
+                  </Button>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    borderColor="rgba(225, 29, 72, 0.35)"
+                    color="red.400"
+                    _hover={{ backgroundColor: 'rgba(225, 29, 72, 0.14)' }}
+                    onClick={() => deleteChannel(channel.id)}
+                  >
+                    Delete
+                  </Button>
+                </HStack>
+              </Box>
+            ))}
+          </SimpleGrid>
         ) : (
-          <pre>{JSON.stringify(channels, null, 2)}</pre>
+          <Text fontSize="xs" color={colors.textMuted}>
+            No channels found.
+          </Text>
         )}
-      </div>
+      </Box>
 
-      <h2>Notifications</h2>
-      <div>
-        {(notifications ?? []).length ? (
-          (notifications ?? []).map((notification) => (
-            <div
-              key={notification.id}
-              style={{
-                marginBottom: '12px',
-                padding: '12px',
-                border: '1px solid #444',
-                borderRadius: '8px',
-              }}
-            >
-              <div>{notification.content}</div>
-              <div style={{ opacity: 0.7, fontSize: '12px' }}>
-                {notification.type}{' '}
-                {notification.isRead ? '(read)' : '(unread)'}
-              </div>
-              {!notification.isRead && (
-                <button onClick={() => markNotificationAsRead(notification.id)}>
-                  Mark read
-                </button>
-              )}
-            </div>
-          ))
-        ) : (
-          <pre>{JSON.stringify(notifications, null, 2)}</pre>
-        )}
-      </div>
+      {/* Friends & Directory Section */}
+      <Box {...cardProps}>
+        <Text fontSize="sm" fontWeight="600" color={colors.white} mb="2px">
+          Directory & Connections
+        </Text>
+        <Text fontSize="xs" color={colors.textMuted} mb="16px">
+          Find teammates by username or email and manage connection requests.
+        </Text>
 
-      <h2>Friends</h2>
-      <div style={{ marginBottom: '16px', maxWidth: '520px' }}>
-        <input
-          type="text"
-          placeholder="Search by username, name, or email"
-          value={friendSearchQuery}
-          onChange={(event) => setFriendSearchQuery(event.target.value)}
-          style={{
-            display: 'block',
-            width: '100%',
-            marginBottom: '8px',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <button
-          onClick={performFriendSearch}
-          disabled={isSearchingFriends}
-          style={{ marginRight: '8px' }}
-        >
-          {isSearchingFriends ? 'Searching...' : 'Search Users'}
-        </button>
-        <button onClick={submitFriendRequest} disabled={!selectedFriendUser}>
-          Send Friend Request
-        </button>
+        <HStack spacing="10px" mb="12px" flexWrap="wrap">
+          <Input
+            {...inputProps}
+            maxW="320px"
+            placeholder="Search by username, name, or email..."
+            value={friendSearchQuery}
+            onChange={(event) => setFriendSearchQuery(event.target.value)}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            borderColor={colors.borderStrong}
+            color={colors.white}
+            _hover={{ backgroundColor: colors.darkLight }}
+            onClick={performFriendSearch}
+            isLoading={isSearchingFriends}
+          >
+            Search Directory
+          </Button>
+          <Button
+            size="sm"
+            backgroundColor={colors.accent}
+            color="white"
+            _hover={{ backgroundColor: colors.accentHover }}
+            onClick={submitFriendRequest}
+            isDisabled={!selectedFriendUser}
+          >
+            Send Request
+          </Button>
+        </HStack>
 
         {selectedFriendUser ? (
-          <p style={{ marginTop: '8px' }}>
-            Selected: {selectedFriendUser.firstName}{' '}
-            {selectedFriendUser.lastName} (
+          <Text fontSize="xs" color={colors.accent} mb="10px">
+            Selected: {selectedFriendUser.firstName} {selectedFriendUser.lastName} (
             {selectedFriendUser.username ||
               selectedFriendUser.email ||
               selectedFriendUser.id}
             )
-          </p>
+          </Text>
         ) : null}
 
         {(friendSearchResults ?? []).length ? (
-          <div
-            style={{
-              marginTop: '10px',
-              border: '1px solid #444',
-              borderRadius: '8px',
-            }}
+          <VStack
+            align="stretch"
+            spacing="6px"
+            mb="14px"
+            p="8px"
+            borderRadius="8px"
+            backgroundColor={colors.grayLight}
+            border="1px solid"
+            borderColor={colors.border}
           >
             {friendSearchResults.map((user) => (
-              <div
+              <HStack
                 key={user.id}
-                style={{
-                  padding: '10px',
-                  borderBottom: '1px solid #333',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
+                justifyContent="space-between"
+                p="6px 8px"
+                borderRadius="6px"
+                _hover={{ backgroundColor: colors.darkLight }}
               >
-                <div>
-                  <div>
-                    {[user.firstName, user.lastName]
-                      .filter(Boolean)
-                      .join(' ') ||
+                <Box>
+                  <Text fontSize="xs" fontWeight="600" color={colors.white}>
+                    {[user.firstName, user.lastName].filter(Boolean).join(' ') ||
                       user.username ||
                       'Unknown user'}
-                  </div>
-                  <div style={{ opacity: 0.75, fontSize: '12px' }}>
+                  </Text>
+                  <Text fontSize="11px" color={colors.textMuted}>
                     {user.username ? `@${user.username}` : ''}{' '}
-                    {user.email ? `- ${user.email}` : ''}
-                  </div>
-                </div>
-                <button onClick={() => setSelectedFriendUser(user)}>
+                    {user.email ? `• ${user.email}` : ''}
+                  </Text>
+                </Box>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  borderColor={colors.border}
+                  color={colors.white}
+                  onClick={() => setSelectedFriendUser(user)}
+                >
                   Select
-                </button>
-              </div>
+                </Button>
+              </HStack>
             ))}
-          </div>
+          </VStack>
         ) : null}
 
-        {friendStatus ? <p>{friendStatus}</p> : null}
-      </div>
-
-      <div style={{ marginBottom: '16px' }}>
-        <h3>Incoming Requests</h3>
-        {(incomingRequests ?? []).map((request) => (
-          <div key={request.id} style={{ marginBottom: '8px' }}>
-            <span>{request.senderId}</span>
-            <button onClick={() => updateFriendRequest(request.id, 'accept')}>
-              Accept
-            </button>
-            <button onClick={() => updateFriendRequest(request.id, 'reject')}>
-              Reject
-            </button>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ marginBottom: '16px' }}>
-        <h3>Outgoing Requests</h3>
-        {(outgoingRequests ?? []).map((request) => (
-          <div key={request.id} style={{ marginBottom: '8px' }}>
-            <span>{request.receiverId}</span>
-            <button onClick={() => updateFriendRequest(request.id, 'cancel')}>
-              Cancel
-            </button>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ marginBottom: '16px' }}>
-        <h3>Friends</h3>
-        {(friends ?? []).map((friendship) => {
-          const userId = getCurrentUserId();
-          const friendId =
-            friendship.userId1 === userId
-              ? friendship.userId2
-              : friendship.userId1;
-
-          return (
-            <div key={`${friendship.userId1}:${friendship.userId2}`}>
-              <span>{friendId}</span>
-              <button onClick={() => removeFriend(friendship)}>Unfriend</button>
-            </div>
-          );
-        })}
-      </div>
-
-      <h2>Invitations</h2>
-      <div style={{ marginBottom: '16px', maxWidth: '420px' }}>
-        <input
-          type="text"
-          placeholder="Invite code"
-          value={inviteCode}
-          onChange={(event) => setInviteCode(event.target.value)}
-          style={{
-            display: 'block',
-            width: '100%',
-            marginBottom: '8px',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <button onClick={previewInvitation} style={{ marginRight: '8px' }}>
-          Resolve
-        </button>
-        <button onClick={acceptInvite}>Accept</button>
-        {invitationPreview ? (
-          <pre style={{ marginTop: '8px' }}>
-            {JSON.stringify(invitationPreview, null, 2)}
-          </pre>
+        {friendStatus ? (
+          <Text fontSize="xs" color={colors.accent} mb="12px">
+            {friendStatus}
+          </Text>
         ) : null}
-      </div>
 
-      <div style={{ marginBottom: '16px', maxWidth: '420px' }}>
-        <input
-          type="text"
-          placeholder="Server id"
-          value={selectedServerForInvite}
-          onChange={(event) => setSelectedServerForInvite(event.target.value)}
-          style={{
-            display: 'block',
-            width: '100%',
-            marginBottom: '8px',
-            color: 'black',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid #ccc',
-          }}
-        />
-        <button onClick={createInvitationCode} style={{ marginRight: '8px' }}>
-          Create Invitation
-        </button>
-        <button onClick={loadServerInvitations}>List Invitations</button>
-        {(serverInvites ?? []).length ? (
-          <pre style={{ marginTop: '8px' }}>
-            {JSON.stringify(serverInvites, null, 2)}
-          </pre>
-        ) : null}
-      </div>
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing="12px" mt="12px">
+          <Box
+            p="12px"
+            borderRadius="8px"
+            backgroundColor={colors.grayLight}
+            border="1px solid"
+            borderColor={colors.border}
+          >
+            <Text fontSize="xs" fontWeight="600" color={colors.textDim} mb="8px">
+              Incoming Requests ({(incomingRequests ?? []).length})
+            </Text>
+            <VStack align="stretch" spacing="6px">
+              {(incomingRequests ?? []).map((request) => (
+                <HStack key={request.id} justifyContent="space-between">
+                  <Text fontSize="xs" color={colors.white} isTruncated>
+                    {request.senderId}
+                  </Text>
+                  <HStack spacing="4px">
+                    <Button
+                      size="xs"
+                      backgroundColor={colors.success}
+                      color="white"
+                      onClick={() => updateFriendRequest(request.id, 'accept')}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      borderColor={colors.border}
+                      color={colors.textDim}
+                      onClick={() => updateFriendRequest(request.id, 'reject')}
+                    >
+                      Decline
+                    </Button>
+                  </HStack>
+                </HStack>
+              ))}
+            </VStack>
+          </Box>
 
-      {invitationStatus ? <p>{invitationStatus}</p> : null}
-    </>
+          <Box
+            p="12px"
+            borderRadius="8px"
+            backgroundColor={colors.grayLight}
+            border="1px solid"
+            borderColor={colors.border}
+          >
+            <Text fontSize="xs" fontWeight="600" color={colors.textDim} mb="8px">
+              Outgoing Requests ({(outgoingRequests ?? []).length})
+            </Text>
+            <VStack align="stretch" spacing="6px">
+              {(outgoingRequests ?? []).map((request) => (
+                <HStack key={request.id} justifyContent="space-between">
+                  <Text fontSize="xs" color={colors.white} isTruncated>
+                    {request.receiverId}
+                  </Text>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    borderColor={colors.border}
+                    color={colors.textDim}
+                    onClick={() => updateFriendRequest(request.id, 'cancel')}
+                  >
+                    Cancel
+                  </Button>
+                </HStack>
+              ))}
+            </VStack>
+          </Box>
+
+          <Box
+            p="12px"
+            borderRadius="8px"
+            backgroundColor={colors.grayLight}
+            border="1px solid"
+            borderColor={colors.border}
+          >
+            <Text fontSize="xs" fontWeight="600" color={colors.textDim} mb="8px">
+              Active Connections ({(friends ?? []).length})
+            </Text>
+            <VStack align="stretch" spacing="6px">
+              {(friends ?? []).map((friendship) => {
+                const userId = getCurrentUserId();
+                const friendId =
+                  friendship.userId1 === userId
+                    ? friendship.userId2
+                    : friendship.userId1;
+
+                return (
+                  <HStack
+                    key={`${friendship.userId1}:${friendship.userId2}`}
+                    justifyContent="space-between"
+                  >
+                    <Text fontSize="xs" color={colors.white} isTruncated>
+                      {friendId}
+                    </Text>
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      color="red.400"
+                      onClick={() => removeFriend(friendship)}
+                    >
+                      Remove
+                    </Button>
+                  </HStack>
+                );
+              })}
+            </VStack>
+          </Box>
+        </SimpleGrid>
+      </Box>
+
+      {/* Invitations & Notifications Grid */}
+      <SimpleGrid columns={{ base: 1, lg: 2 }} spacing="16px">
+        <Box {...cardProps}>
+          <Text fontSize="sm" fontWeight="600" color={colors.white} mb="2px">
+            Workspace Invitations
+          </Text>
+          <Text fontSize="xs" color={colors.textMuted} mb="16px">
+            Redeem an invitation code or generate invite links for your server.
+          </Text>
+
+          <VStack align="stretch" spacing="12px">
+            <HStack spacing="8px">
+              <Input
+                {...inputProps}
+                placeholder="Enter invite code"
+                value={inviteCode}
+                onChange={(event) => setInviteCode(event.target.value)}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor={colors.borderStrong}
+                color={colors.white}
+                onClick={previewInvitation}
+              >
+                Inspect
+              </Button>
+              <Button
+                size="sm"
+                backgroundColor={colors.accent}
+                color="white"
+                _hover={{ backgroundColor: colors.accentHover }}
+                onClick={acceptInvite}
+              >
+                Join
+              </Button>
+            </HStack>
+
+            {invitationPreview ? (
+              <Code
+                p="8px"
+                borderRadius="6px"
+                fontSize="11px"
+                backgroundColor={colors.grayDarkest}
+                color={colors.textDim}
+                whiteSpace="pre-wrap"
+              >
+                {JSON.stringify(invitationPreview, null, 2)}
+              </Code>
+            ) : null}
+
+            <HStack spacing="8px" pt="4px">
+              <Input
+                {...inputProps}
+                placeholder="Server ID for invite generation"
+                value={selectedServerForInvite}
+                onChange={(event) => setSelectedServerForInvite(event.target.value)}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor={colors.borderStrong}
+                color={colors.white}
+                onClick={createInvitationCode}
+              >
+                Generate
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                borderColor={colors.border}
+                color={colors.textDim}
+                onClick={loadServerInvitations}
+              >
+                List
+              </Button>
+            </HStack>
+
+            {(serverInvites ?? []).length ? (
+              <Code
+                p="8px"
+                borderRadius="6px"
+                fontSize="11px"
+                backgroundColor={colors.grayDarkest}
+                color={colors.textDim}
+                whiteSpace="pre-wrap"
+              >
+                {JSON.stringify(serverInvites, null, 2)}
+              </Code>
+            ) : null}
+
+            {invitationStatus ? (
+              <Text fontSize="xs" color={colors.accent}>
+                {invitationStatus}
+              </Text>
+            ) : null}
+          </VStack>
+        </Box>
+
+        <Box {...cardProps}>
+          <Text fontSize="sm" fontWeight="600" color={colors.white} mb="2px">
+            Recent Notifications
+          </Text>
+          <Text fontSize="xs" color={colors.textMuted} mb="16px">
+            Activity and system alerts associated with your account.
+          </Text>
+
+          {(notifications ?? []).length ? (
+            <VStack align="stretch" spacing="8px" maxH="240px" overflowY="auto">
+              {(notifications ?? []).map((notification) => (
+                <HStack
+                  key={notification.id}
+                  p="10px 12px"
+                  borderRadius="8px"
+                  backgroundColor={colors.grayLight}
+                  border="1px solid"
+                  borderColor={colors.border}
+                  justifyContent="space-between"
+                >
+                  <Box minW={0}>
+                    <Text fontSize="xs" color={colors.white} fontWeight="500">
+                      {notification.content}
+                    </Text>
+                    <Text fontSize="11px" color={colors.textMuted}>
+                      {notification.type} • {notification.isRead ? 'Read' : 'Unread'}
+                    </Text>
+                  </Box>
+                  {!notification.isRead && (
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      color={colors.accent}
+                      onClick={() => markNotificationAsRead(notification.id)}
+                    >
+                      Mark read
+                    </Button>
+                  )}
+                </HStack>
+              ))}
+            </VStack>
+          ) : (
+            <Text fontSize="xs" color={colors.textMuted}>
+              No notifications recorded.
+            </Text>
+          )}
+        </Box>
+      </SimpleGrid>
+    </VStack>
   );
 }
 

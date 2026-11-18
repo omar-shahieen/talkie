@@ -7,12 +7,14 @@ export default function AppRightSidebar() {
   const colors = useThemedColors();
   return (
     <Box
-      width="325px"
-      paddingX="5px"
+      width="250px"
+      minWidth="250px"
+      display={{ base: 'none', lg: 'flex' }}
+      paddingX="8px"
       backgroundColor={colors.grayMedium}
-      display="flex"
+      borderLeft="1px solid"
+      borderColor={colors.border}
       flexDirection="column"
-      // flexGrow={1}
     >
       <AppMemberList />
     </Box>

@@ -5,7 +5,6 @@ import {
   getPresenceColor,
   getPresenceLabel,
 } from '../../hooks/usePresence';
-
 import { useThemedColors } from '../theme/colors';
 
 export type AppCategoryItemProps = {
@@ -33,45 +32,57 @@ export default function AppChannelListItem({
       display="flex"
       justifyContent="start"
       alignItems="center"
-      padding="3px"
-      backgroundColor={active ? colors.darkLight : 'transparent'}
-      borderRadius="3px"
+      paddingX="10px"
+      paddingY="7px"
+      backgroundColor={active ? colors.accentSoft : 'transparent'}
+      borderRadius="8px"
       marginY="2px"
       cursor="pointer"
       onClick={onClick}
+      transition="all 0.14s ease"
       _hover={{
-        backgroundColor: colors.darkLight,
+        backgroundColor: active ? colors.accentSoft : colors.darkLight,
       }}
       position="relative"
       title={isDm ? `${label} - ${presenceLabel}` : undefined}
     >
       {isDm ? (
         <Box
-          width="6px"
-          height="6px"
+          width="8px"
+          height="8px"
           borderRadius="full"
           backgroundColor={presenceColor}
-          marginRight="8px"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
+          marginRight="10px"
+          flexShrink={0}
         />
       ) : (
         <Text
-          color={colors.lightGray}
-          marginRight="10px"
-          fontStyle="italic"
-          fontSize="xl"
+          color={active ? colors.accent : colors.textMuted}
+          marginRight="8px"
+          fontWeight="600"
+          fontSize="md"
+          lineHeight="1"
         >
           #
         </Text>
       )}
-      <Text color={colors.white}>{label}</Text>
+      <Text
+        color={active ? colors.white : colors.textDim}
+        fontSize="sm"
+        fontWeight={active ? '600' : '500'}
+        isTruncated
+      >
+        {label}
+      </Text>
       <Box flex="1" />
       {isDm && presence.status !== 'offline' && (
-        <Text color={colors.textMuted} fontSize="xs" marginRight="4px">
-          ●
-        </Text>
+        <Box
+          width="6px"
+          height="6px"
+          borderRadius="full"
+          backgroundColor={presenceColor}
+          marginLeft="6px"
+        />
       )}
     </Box>
   );

@@ -1,15 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
+  Badge,
   Box,
   Button,
   Checkbox,
-  Divider,
   FormControl,
   FormLabel,
+  Heading,
   HStack,
   Input,
   Link,
+  SimpleGrid,
   Spinner,
   Table,
   Tbody,
@@ -20,6 +22,7 @@ import {
   Tr,
   VStack,
 } from '@chakra-ui/react';
+import { useThemedColors } from '../theme/colors';
 import {
   createRole,
   deleteRole,
@@ -268,6 +271,8 @@ export default function AdminManagementView() {
     }
   }
 
+  const colors = useThemedColors();
+
   if (isLoadingUser) {
     return (
       <Box
@@ -276,91 +281,132 @@ export default function AdminManagementView() {
         alignItems="center"
         minH="200px"
       >
-        <Spinner />
+        <Spinner color={colors.accent} />
       </Box>
     );
   }
 
   if (!canAccessAdmin) {
     return (
-      <Box>
-        <Text fontSize="2xl" fontWeight="bold" marginBottom="12px">
-          Admin Management
+      <Box
+        padding="24px"
+        borderRadius="12px"
+        backgroundColor={colors.surfaceElevated}
+        border="1px solid"
+        borderColor={colors.border}
+      >
+        <Heading size="md" color={colors.white} marginBottom="8px">
+          Admin Console
+        </Heading>
+        <Text fontSize="xs" color="red.400" marginBottom="12px">
+          Access restricted: administrator privileges are required.
         </Text>
-        <Text color="red.300" marginBottom="10px">
-          This page is available for admin users only.
-        </Text>
-        <Link as={RouterLink} to="/settings" color="blue.300">
-          Back to settings
+        <Link as={RouterLink} to="/settings" color={colors.accent} fontSize="xs">
+          ← Return to Account Settings
         </Link>
       </Box>
     );
   }
 
+  const inputProps = {
+    size: 'sm' as const,
+    backgroundColor: colors.darkLight,
+    borderColor: colors.border,
+    borderRadius: '8px',
+    color: colors.white,
+    _placeholder: { color: colors.textMuted },
+  };
+
   return (
-    <Box>
-      <Text fontSize="2xl" fontWeight="bold" marginBottom="8px">
-        Admin Management
-      </Text>
-      <Text color="whiteAlpha.700" marginBottom="20px">
-        Manage roles, permissions, and access-control checks.
-      </Text>
+    <VStack align="stretch" spacing="24px" paddingBottom="48px">
+      <Box>
+        <Heading size="md" color={colors.white} letterSpacing="-0.02em" marginBottom="4px">
+          Administration & Access Control
+        </Heading>
+        <Text fontSize="xs" color={colors.textDim}>
+          Configure RBAC roles, bitmask permissions, and verify workspace policy enforcement.
+        </Text>
+      </Box>
 
       <Box
-        marginBottom="24px"
-        padding="14px"
-        border="1px solid #3d3d3d"
-        borderRadius="10px"
+        padding="20px"
+        backgroundColor={colors.surfaceElevated}
+        border="1px solid"
+        borderColor={colors.border}
+        borderRadius="12px"
       >
-        <Text fontSize="lg" fontWeight="bold" marginBottom="10px">
+        <Text fontSize="sm" fontWeight="600" color={colors.white} marginBottom="4px">
           Roles & Permissions
         </Text>
+        <Text fontSize="xs" color={colors.textMuted} marginBottom="16px">
+          Define server-level roles and assign granular capability flags.
+        </Text>
 
-        <VStack align="stretch" spacing="10px" marginBottom="16px">
-          <FormControl>
-            <FormLabel>Server ID</FormLabel>
-            <Input
-              value={serverId}
-              onChange={(event) => setServerId(event.target.value)}
-              placeholder="Server id"
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Role Name</FormLabel>
-            <Input
-              value={roleName}
-              onChange={(event) => setRoleName(event.target.value)}
-              placeholder="Moderator"
-            />
-          </FormControl>
-          <HStack spacing="10px">
+        <VStack align="stretch" spacing="12px" marginBottom="20px">
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing="12px">
             <FormControl>
-              <FormLabel>Position</FormLabel>
+              <FormLabel fontSize="xs" color={colors.textDim} mb="4px">
+                Server ID
+              </FormLabel>
               <Input
-                value={rolePosition}
-                onChange={(event) => setRolePosition(event.target.value)}
-                placeholder="0"
-                type="number"
+                {...inputProps}
+                value={serverId}
+                onChange={(event) => setServerId(event.target.value)}
+                placeholder="Target server ID"
               />
             </FormControl>
-            <FormControl display="flex" alignItems="center" marginTop="30px">
-              <Checkbox
-                isChecked={isEveryone}
-                onChange={(event) => setIsEveryone(event.target.checked)}
-              >
-                Everyone role
-              </Checkbox>
+            <FormControl>
+              <FormLabel fontSize="xs" color={colors.textDim} mb="4px">
+                Role Name
+              </FormLabel>
+              <Input
+                {...inputProps}
+                value={roleName}
+                onChange={(event) => setRoleName(event.target.value)}
+                placeholder="e.g. Moderator"
+              />
             </FormControl>
-          </HStack>
+            <FormControl>
+              <FormLabel fontSize="xs" color={colors.textDim} mb="4px">
+                Hierarchy Position
+              </FormLabel>
+              <HStack spacing="12px">
+                <Input
+                  {...inputProps}
+                  value={rolePosition}
+                  onChange={(event) => setRolePosition(event.target.value)}
+                  placeholder="0"
+                  type="number"
+                  maxW="110px"
+                />
+                <Checkbox
+                  size="sm"
+                  isChecked={isEveryone}
+                  onChange={(event) => setIsEveryone(event.target.checked)}
+                >
+                  <Text fontSize="xs" color={colors.textDim}>
+                    Everyone role
+                  </Text>
+                </Checkbox>
+              </HStack>
+            </FormControl>
+          </SimpleGrid>
 
-          <Box>
-            <Text fontSize="sm" marginBottom="6px">
-              Permissions
+          <Box
+            p="12px"
+            borderRadius="8px"
+            backgroundColor={colors.grayLight}
+            border="1px solid"
+            borderColor={colors.border}
+          >
+            <Text fontSize="xs" fontWeight="600" color={colors.textDim} marginBottom="8px">
+              Capability Flags
             </Text>
-            <HStack wrap="wrap" spacing="10px">
+            <SimpleGrid columns={{ base: 2, md: 4 }} spacing="8px">
               {PERMISSIONS.map((permission) => (
                 <Checkbox
                   key={permission.key}
+                  size="sm"
                   isChecked={selectedPermissions.includes(permission.key)}
                   onChange={(event) => {
                     setSelectedPermissions((current) =>
@@ -370,208 +416,288 @@ export default function AdminManagementView() {
                     );
                   }}
                 >
-                  {permission.key}
+                  <Text fontSize="xs" color={colors.white}>
+                    {permission.key}
+                  </Text>
                 </Checkbox>
               ))}
-            </HStack>
+            </SimpleGrid>
           </Box>
 
-          <Button
-            width="fit-content"
-            colorScheme="blue"
-            onClick={submitRoleCreate}
-            isLoading={isSubmitting}
-          >
-            Create Role
-          </Button>
+          <Box>
+            <Button
+              size="sm"
+              backgroundColor={colors.accent}
+              color="white"
+              _hover={{ backgroundColor: colors.accentHover }}
+              onClick={submitRoleCreate}
+              isLoading={isSubmitting}
+            >
+              Create Role
+            </Button>
+          </Box>
         </VStack>
 
         {statusMessage ? (
-          <Text marginBottom="10px" color="yellow.300">
+          <Text marginBottom="12px" fontSize="xs" color={colors.accent}>
             {statusMessage}
           </Text>
         ) : null}
 
         {rolesError ? (
-          <Text marginBottom="10px" color="red.300">
+          <Text marginBottom="12px" fontSize="xs" color="red.400">
             {rolesError}
           </Text>
         ) : null}
 
         {isLoadingRoles ? (
-          <Spinner size="sm" />
+          <Spinner size="sm" color={colors.accent} />
         ) : (
-          <Table size="sm" variant="simple">
-            <Thead>
-              <Tr>
-                <Th color="gray.300">Name</Th>
-                <Th color="gray.300">Server</Th>
-                <Th color="gray.300">Position</Th>
-                <Th color="gray.300">Permissions</Th>
-                <Th color="gray.300">Actions</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {roles.map((role) => {
-                const isEditing = editingRoleId === role.id;
+          <Box
+            borderRadius="8px"
+            border="1px solid"
+            borderColor={colors.border}
+            overflowX="auto"
+          >
+            <Table size="sm" variant="simple">
+              <Thead backgroundColor={colors.grayLight}>
+                <Tr>
+                  <Th color={colors.textMuted} borderColor={colors.border} fontSize="10px">
+                    Name
+                  </Th>
+                  <Th color={colors.textMuted} borderColor={colors.border} fontSize="10px">
+                    Server
+                  </Th>
+                  <Th color={colors.textMuted} borderColor={colors.border} fontSize="10px">
+                    Position
+                  </Th>
+                  <Th color={colors.textMuted} borderColor={colors.border} fontSize="10px">
+                    Permissions
+                  </Th>
+                  <Th color={colors.textMuted} borderColor={colors.border} fontSize="10px">
+                    Actions
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {roles.map((role) => {
+                  const isEditing = editingRoleId === role.id;
 
-                return (
-                  <Tr key={role.id}>
-                    <Td>
-                      {isEditing ? (
-                        <Input
-                          value={editName}
-                          onChange={(event) => setEditName(event.target.value)}
-                          size="sm"
-                        />
-                      ) : (
-                        role.name
-                      )}
-                    </Td>
-                    <Td>{role.serverId}</Td>
-                    <Td>
-                      {isEditing ? (
-                        <Input
-                          value={editPosition}
-                          onChange={(event) =>
-                            setEditPosition(event.target.value)
-                          }
-                          size="sm"
-                          type="number"
-                          maxW="90px"
-                        />
-                      ) : (
-                        role.position
-                      )}
-                    </Td>
-                    <Td>
-                      {isEditing ? (
-                        <VStack align="start" spacing="2px">
-                          {PERMISSIONS.map((permission) => (
-                            <Checkbox
-                              key={`${role.id}-${permission.key}`}
-                              size="sm"
-                              isChecked={editPermissions.includes(
-                                permission.key,
-                              )}
-                              onChange={(event) => {
-                                setEditPermissions((current) =>
-                                  event.target.checked
-                                    ? [...current, permission.key]
-                                    : current.filter(
-                                        (item) => item !== permission.key,
-                                      ),
-                                );
-                              }}
-                            >
-                              {permission.key}
-                            </Checkbox>
-                          ))}
-                        </VStack>
-                      ) : (
-                        fromPermissionString(role.permissions).join(', ') ||
-                        'None'
-                      )}
-                    </Td>
-                    <Td>
-                      <HStack spacing="6px">
+                  return (
+                    <Tr key={role.id}>
+                      <Td borderColor={colors.border} fontSize="xs" fontWeight="600">
                         {isEditing ? (
-                          <>
-                            <Button
-                              size="xs"
-                              colorScheme="green"
-                              onClick={() => void submitRoleUpdate(role.id)}
-                              isLoading={isSubmitting}
-                            >
-                              Save
-                            </Button>
-                            <Button
-                              size="xs"
-                              variant="outline"
-                              onClick={() => setEditingRoleId('')}
-                            >
-                              Cancel
-                            </Button>
-                          </>
+                          <Input
+                            {...inputProps}
+                            value={editName}
+                            onChange={(event) => setEditName(event.target.value)}
+                          />
                         ) : (
+                          role.name
+                        )}
+                      </Td>
+                      <Td borderColor={colors.border} fontSize="xs" color={colors.textDim}>
+                        {role.serverId}
+                      </Td>
+                      <Td borderColor={colors.border} fontSize="xs">
+                        {isEditing ? (
+                          <Input
+                            {...inputProps}
+                            value={editPosition}
+                            onChange={(event) =>
+                              setEditPosition(event.target.value)
+                            }
+                            type="number"
+                            maxW="80px"
+                          />
+                        ) : (
+                          role.position
+                        )}
+                      </Td>
+                      <Td borderColor={colors.border}>
+                        {isEditing ? (
+                          <VStack align="start" spacing="4px">
+                            {PERMISSIONS.map((permission) => (
+                              <Checkbox
+                                key={`${role.id}-${permission.key}`}
+                                size="sm"
+                                isChecked={editPermissions.includes(
+                                  permission.key,
+                                )}
+                                onChange={(event) => {
+                                  setEditPermissions((current) =>
+                                    event.target.checked
+                                      ? [...current, permission.key]
+                                      : current.filter(
+                                          (item) => item !== permission.key,
+                                        ),
+                                  );
+                                }}
+                              >
+                                <Text fontSize="xs">{permission.key}</Text>
+                              </Checkbox>
+                            ))}
+                          </VStack>
+                        ) : (
+                          <HStack wrap="wrap" spacing="4px">
+                            {fromPermissionString(role.permissions).length ? (
+                              fromPermissionString(role.permissions).map((perm) => (
+                                <Badge
+                                  key={perm}
+                                  fontSize="10px"
+                                  borderRadius="4px"
+                                  backgroundColor={colors.accentSoft}
+                                  color={colors.accent}
+                                  textTransform="none"
+                                >
+                                  {perm}
+                                </Badge>
+                              ))
+                            ) : (
+                              <Text fontSize="xs" color={colors.textMuted}>
+                                None
+                              </Text>
+                            )}
+                          </HStack>
+                        )}
+                      </Td>
+                      <Td borderColor={colors.border}>
+                        <HStack spacing="6px">
+                          {isEditing ? (
+                            <>
+                              <Button
+                                size="xs"
+                                backgroundColor={colors.success}
+                                color="white"
+                                onClick={() => void submitRoleUpdate(role.id)}
+                                isLoading={isSubmitting}
+                              >
+                                Save
+                              </Button>
+                              <Button
+                                size="xs"
+                                variant="outline"
+                                borderColor={colors.border}
+                                onClick={() => setEditingRoleId('')}
+                              >
+                                Cancel
+                              </Button>
+                            </>
+                          ) : (
+                            <Button
+                              size="xs"
+                              onClick={() => startEditingRole(role)}
+                              variant="outline"
+                              borderColor={colors.border}
+                              color={colors.textDim}
+                              _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                            >
+                              Edit
+                            </Button>
+                          )}
                           <Button
                             size="xs"
-                            onClick={() => startEditingRole(role)}
                             variant="outline"
+                            borderColor="rgba(225, 29, 72, 0.35)"
+                            color="red.400"
+                            _hover={{ backgroundColor: 'rgba(225, 29, 72, 0.14)' }}
+                            onClick={() => void submitRoleDelete(role.id)}
+                            isLoading={isSubmitting}
                           >
-                            Edit
+                            Delete
                           </Button>
-                        )}
-                        <Button
-                          size="xs"
-                          colorScheme="red"
-                          variant="outline"
-                          onClick={() => void submitRoleDelete(role.id)}
-                          isLoading={isSubmitting}
-                        >
-                          Delete
-                        </Button>
-                      </HStack>
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </Tbody>
-          </Table>
+                        </HStack>
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </Tbody>
+            </Table>
+          </Box>
         )}
       </Box>
 
-      <Divider marginY="18px" />
-
-      <Box padding="14px" border="1px solid #3d3d3d" borderRadius="10px">
-        <Text fontSize="lg" fontWeight="bold" marginBottom="10px">
-          Access Control Checks
+      <Box
+        padding="20px"
+        backgroundColor={colors.surfaceElevated}
+        border="1px solid"
+        borderColor={colors.border}
+        borderRadius="12px"
+      >
+        <Text fontSize="sm" fontWeight="600" color={colors.white} marginBottom="4px">
+          Access Control Diagnostics
         </Text>
-        <HStack spacing="10px" marginBottom="10px">
+        <Text fontSize="xs" color={colors.textMuted} marginBottom="16px">
+          Verify effective application-level and server-level permissions for any user.
+        </Text>
+
+        <HStack spacing="10px" marginBottom="14px">
           <Button
+            size="sm"
             onClick={checkAppAccess}
             isLoading={isCheckingAccess}
-            colorScheme="blue"
             variant="outline"
+            borderColor={colors.borderStrong}
+            color={colors.white}
+            _hover={{ backgroundColor: colors.darkLight }}
           >
             Check App Access
           </Button>
         </HStack>
 
-        <HStack spacing="8px" marginBottom="10px" align="end">
-          <FormControl>
-            <FormLabel>User ID</FormLabel>
+        <HStack spacing="10px" marginBottom="14px" align="end" flexWrap="wrap">
+          <FormControl maxW="260px">
+            <FormLabel fontSize="xs" color={colors.textDim} mb="4px">
+              User ID
+            </FormLabel>
             <Input
+              {...inputProps}
               value={resolveUserId}
               onChange={(event) => setResolveUserId(event.target.value)}
-              placeholder="User id"
+              placeholder="User UUID"
             />
           </FormControl>
-          <FormControl>
-            <FormLabel>Server ID</FormLabel>
+          <FormControl maxW="260px">
+            <FormLabel fontSize="xs" color={colors.textDim} mb="4px">
+              Server ID
+            </FormLabel>
             <Input
+              {...inputProps}
               value={resolveServerId}
               onChange={(event) => setResolveServerId(event.target.value)}
-              placeholder="Server id"
+              placeholder="Server UUID"
             />
           </FormControl>
           <Button
+            size="sm"
             onClick={checkServerAccess}
             isLoading={isCheckingAccess}
-            colorScheme="blue"
+            backgroundColor={colors.accent}
+            color="white"
+            _hover={{ backgroundColor: colors.accentHover }}
           >
             Check Server Access
           </Button>
         </HStack>
 
-        {accessCheckResult ? (
-          <Text color="yellow.300">{accessCheckResult}</Text>
-        ) : (
-          <Text color="whiteAlpha.600">
-            Run a check to see access response.
-          </Text>
-        )}
+        <Box
+          p="10px 12px"
+          borderRadius="8px"
+          backgroundColor={colors.grayLight}
+          border="1px solid"
+          borderColor={colors.border}
+        >
+          {accessCheckResult ? (
+            <Text fontSize="xs" color={colors.accent} fontWeight="500">
+              {accessCheckResult}
+            </Text>
+          ) : (
+            <Text fontSize="xs" color={colors.textMuted}>
+              Run a diagnostic check above to inspect access evaluation output.
+            </Text>
+          )}
+        </Box>
       </Box>
-    </Box>
+    </VStack>
   );
 }
