@@ -194,37 +194,67 @@ export default function AppChatInput({
   }, []);
 
   return (
-    <Box paddingX="15px" backgroundColor={colors.grayLight}>
+    <Box paddingX="16px" paddingBottom="16px" paddingTop="6px" backgroundColor={colors.grayLight}>
       {replyTarget ? (
-        <Box marginBottom="6px" color={colors.textDim} fontSize="sm">
-          Replying to {replyTarget.app_users?.name ?? 'message'}
-          <button
+        <Box
+          marginBottom="8px"
+          paddingX="12px"
+          paddingY="6px"
+          borderRadius="10px"
+          backgroundColor={colors.surfaceElevated}
+          border="1px solid"
+          borderColor={colors.border}
+          borderLeft="3px solid"
+          borderLeftColor={colors.accent}
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          color={colors.textDim}
+          fontSize="xs"
+        >
+          <Text isTruncated>
+            Replying to{' '}
+            <Text as="span" fontWeight="600" color={colors.white}>
+              {replyTarget.app_users?.name ?? 'message'}
+            </Text>
+          </Text>
+          <Box
+            as="button"
             onClick={onClearReplyTarget}
-            style={{
-              marginLeft: '8px',
-              color: colors.lightGray,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-            }}
+            marginLeft="10px"
+            color={colors.textMuted}
+            _hover={{ color: colors.white }}
+            background="none"
+            border="none"
+            cursor="pointer"
+            fontWeight="600"
           >
-            Clear
-          </button>
+            Dismiss
+          </Box>
         </Box>
       ) : null}
+
       <Box
         display="flex"
-        justifyContent="space-around"
         alignItems="center"
+        gap="6px"
         backgroundColor={colors.darkLight}
-        padding="5px"
-        borderRadius="8px"
+        border="1px solid"
+        borderColor={colors.border}
+        padding="5px 8px"
+        borderRadius="10px"
+        transition="border-color 0.16s ease, box-shadow 0.16s ease"
+        _focusWithin={{
+          borderColor: colors.accent,
+          boxShadow: `0 0 0 1px ${colors.accent}`,
+        }}
       >
         <AppIconButton
           ariaLabel="Attach files"
+          tooltip="Attach files"
           size="sm"
           withBackground
-          icon={<AddIcon />}
+          icon={<AddIcon boxSize={3} />}
           onClick={openFilePicker}
         />
         <Input
@@ -236,14 +266,15 @@ export default function AppChatInput({
             void uploadFiles(event.target.files)
           }
         />
-        <Box marginX="3px" />
         <Input
-          height="35px"
+          height="36px"
           backgroundColor="transparent"
           color={colors.white}
+          fontSize="sm"
           value={message}
-          borderColor="transparent"
-          placeholder="Message"
+          border="none"
+          _focus={{ boxShadow: 'none' }}
+          placeholder="Message channel..."
           _placeholder={{ color: colors.textMuted }}
           onInput={onInput}
           onKeyPress={onKeyPress}
@@ -251,34 +282,65 @@ export default function AppChatInput({
         />
         <AppIconButton
           ariaLabel="Attach files"
-          icon={<CalendarIcon />}
+          tooltip="Upload attachment"
+          icon={<CalendarIcon boxSize={3.5} />}
           onClick={openFilePicker}
         />
+        <AppIconButton ariaLabel="Mention" tooltip="Mention" icon={<AtSignIcon boxSize={3.5} />} />
         <AppIconButton
           ariaLabel="Send message"
-          icon={<ArrowForwardIcon />}
+          tooltip="Send"
+          icon={<ArrowForwardIcon boxSize={4} />}
           onClick={handleSend}
           disabled={
             isLoading || (!message.trim() && !uploadedAttachments?.length)
           }
-          colorScheme="blue"
+          backgroundColor={
+            message.trim() || uploadedAttachments?.length
+              ? colors.accent
+              : 'transparent'
+          }
+          color={
+            message.trim() || uploadedAttachments?.length
+              ? 'white'
+              : colors.textMuted
+          }
+          _hover={{
+            backgroundColor:
+              message.trim() || uploadedAttachments?.length
+                ? colors.accentHover
+                : colors.darkLight,
+            color: 'white',
+          }}
         />
-        <AppIconButton ariaLabel="Select emoji" icon={<AtSignIcon />} />
       </Box>
+
       {uploadedAttachments?.length ? (
-        <Box marginTop="8px" color={colors.white} fontSize="sm">
-          <Text fontWeight="bold" marginBottom="4px">
-            Attached files
-          </Text>
+        <Box
+          marginTop="8px"
+          display="flex"
+          flexWrap="wrap"
+          gap="6px"
+          color={colors.white}
+          fontSize="xs"
+        >
           {uploadedAttachments.map((attachment) => (
-            <Text key={attachment.url}>
+            <Box
+              key={attachment.url}
+              padding="3px 10px"
+              borderRadius="6px"
+              backgroundColor={colors.accentSoft}
+              border="1px solid"
+              borderColor={colors.border}
+              color={colors.white}
+            >
               {attachment.fileName ?? attachment.url}
-            </Text>
+            </Box>
           ))}
         </Box>
       ) : null}
       {errorMessage ? (
-        <Text marginTop="6px" color="red.300" fontSize="sm">
+        <Text marginTop="6px" color="red.400" fontSize="xs">
           {errorMessage}
         </Text>
       ) : null}

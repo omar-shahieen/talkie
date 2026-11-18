@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Avatar,
+  Badge,
   Box,
   Text,
   Center,
@@ -13,8 +14,9 @@ import {
   ModalCloseButton,
   ModalBody,
 } from '@chakra-ui/react';
+import { AttachmentIcon } from '@chakra-ui/icons';
 import { useThemedColors } from '../theme/colors';
-import { Message, AppUser } from '../../app/datamodels';
+import { Message } from '../../app/datamodels';
 import AppChatInput from './AppChatInput';
 import { useAuth } from '../../hooks/useAuth';
 import { getChatSocket } from '../../app/realtime';
@@ -103,7 +105,7 @@ export default function AppThreadPanel({
     try {
       const data = await fetchThreadMessages(rootMessage.id);
       const messages = data
-        .filter((msg: any) => msg.id !== rootMessage.id) // exclude root message
+        .filter((msg: any) => msg.id !== rootMessage.id)
         .map((msg: any) => normalizeMessage(msg));
 
       setThreadMessages(messages);
@@ -134,23 +136,28 @@ export default function AppThreadPanel({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
       <ModalOverlay />
       <ModalContent
-        backgroundColor={colors.darkMedium}
-        borderRadius="8px"
-        maxHeight="80vh"
+        backgroundColor={colors.surfaceElevated}
+        border="1px solid"
+        borderColor={colors.border}
+        borderRadius="12px"
+        maxHeight="82vh"
         display="flex"
         flexDirection="column"
+        overflow="hidden"
       >
         <ModalHeader
           color={colors.white}
+          fontSize="sm"
+          fontWeight="600"
           borderBottomWidth="1px"
-          borderBottomColor={colors.darkLight}
+          borderBottomColor={colors.border}
         >
-          Thread
+          Discussion Thread
         </ModalHeader>
-        <ModalCloseButton color={colors.white} />
+        <ModalCloseButton color={colors.textDim} />
         <ModalBody
           flex="1"
           overflowY="auto"
@@ -159,15 +166,16 @@ export default function AppThreadPanel({
           padding="0px"
         >
           {isLoading ? (
-            <Center height="100%" paddingY="20px">
-              <Spinner size="lg" color={colors.primary} />
+            <Center height="100%" paddingY="28px">
+              <Spinner size="md" color={colors.accent} />
             </Center>
           ) : (
             <>
               {rootMessage && (
                 <Box
                   borderBottomWidth="1px"
-                  borderBottomColor={colors.darkLight}
+                  borderBottomColor={colors.border}
+                  backgroundColor={colors.grayLight}
                 >
                   <ThreadMessageItem
                     message={rootMessage}
@@ -179,8 +187,10 @@ export default function AppThreadPanel({
               )}
 
               {threadMessages.length === 0 ? (
-                <Center paddingY="20px">
-                  <Text color={colors.textMuted}>No replies yet</Text>
+                <Center paddingY="32px">
+                  <Text color={colors.textMuted} fontSize="xs">
+                    No replies in this thread yet.
+                  </Text>
                 </Center>
               ) : (
                 threadMessages.map((msg) => (
@@ -196,12 +206,11 @@ export default function AppThreadPanel({
           )}
         </ModalBody>
 
-        {/* Chat Input for Thread */}
         <Box
           borderTopWidth="1px"
-          borderTopColor={colors.darkLight}
-          padding="12px"
-          backgroundColor={colors.darkMedium}
+          borderTopColor={colors.border}
+          backgroundColor={colors.grayLight}
+          paddingTop="6px"
         >
           <AppChatInput
             scrollToBottom={() => {}}
@@ -261,59 +270,70 @@ function ThreadMessageItem({
 
   const date = `${
     isToday ? 'Today' : new Date(message.created_at).toLocaleDateString()
-  } at ${new Date(message.created_at).toLocaleTimeString()}`;
+  } at ${new Date(message.created_at).toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+  })}`;
 
   return (
     <Box
       display="flex"
-      paddingX="15px"
-      paddingY="8px"
-      borderLeft={isRoot ? `3px solid ${colors.primary}` : 'none'}
+      paddingX="16px"
+      paddingY="12px"
+      borderLeft={isRoot ? `3px solid ${colors.accent}` : 'none'}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      _hover={{ backgroundColor: colors.darkLight }}
+      _hover={{ backgroundColor: colors.messageHover }}
     >
       <Avatar
         src={message.app_users?.avatar}
         name={message.app_users?.name}
         marginRight="12px"
-        size="sm"
+        size="xs"
+        marginTop="2px"
       />
       <Box flex="1">
-        <Box justifyContent="start" alignItems="end" display="flex">
-          <Text color={colors.white} fontSize="xs" fontWeight="bold">
+        <Box justifyContent="start" alignItems="center" display="flex" gap="8px">
+          <Text color={colors.white} fontSize="xs" fontWeight="600">
             <Link>{message.app_users?.name}</Link>
           </Text>
-          <Box width="10px" />
           <Text fontSize="11px" color={colors.textMuted}>
             {date}
           </Text>
           {isRoot && (
-            <Text fontSize="11px" color={colors.textDim} marginLeft="8px">
-              (Original)
-            </Text>
+            <Badge
+              fontSize="9px"
+              borderRadius="4px"
+              backgroundColor={colors.accentSoft}
+              color={colors.accent}
+              textTransform="none"
+            >
+              Original
+            </Badge>
           )}
         </Box>
-        <Text fontSize="sm" color={colors.white} marginTop="4px">
+        <Text fontSize="sm" color={colors.textDim} marginTop="4px" lineHeight="1.5">
           {message.text}
         </Text>
 
         {message.attachments?.length ? (
-          <Box marginTop="8px">
+          <Box marginTop="8px" display="flex" flexWrap="wrap" gap="6px">
             {message.attachments.map((attachment) => (
               <Box
                 key={attachment.id ?? attachment.url}
-                marginTop="4px"
-                padding="8px"
-                borderRadius="md"
+                padding="6px 10px"
+                borderRadius="8px"
                 backgroundColor={colors.darkLight}
+                border="1px solid"
+                borderColor={colors.border}
               >
                 <a
                   href={normalizeBlobUrl(attachment.url)}
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <Text color="blue.300" fontSize="sm">
+                  <Text color={colors.accent} fontSize="xs" fontWeight="500">
+                    <AttachmentIcon mr="4px" boxSize={3} />
                     {attachment.fileName ?? attachment.url}
                   </Text>
                 </a>
@@ -331,13 +351,15 @@ function ThreadMessageItem({
                 style={{
                   border: '1px solid',
                   borderColor: reaction.reactedByMe
-                    ? colors.primary
-                    : '#4f545c',
-                  backgroundColor: reaction.reactedByMe ? '#2f3136' : '#202225',
-                  color: 'white',
-                  borderRadius: '999px',
+                    ? colors.accent
+                    : colors.border,
+                  backgroundColor: reaction.reactedByMe
+                    ? colors.accentSoft
+                    : colors.darkLight,
+                  color: colors.white,
+                  borderRadius: '6px',
                   padding: '2px 8px',
-                  fontSize: '12px',
+                  fontSize: '11px',
                   cursor: 'pointer',
                 }}
               >
@@ -352,12 +374,12 @@ function ThreadMessageItem({
                   onClick={() => onToggleReaction(message.id!, emoji)}
                   title={`React with ${emoji}`}
                   style={{
-                    border: '1px solid #4f545c',
-                    backgroundColor: '#202225',
-                    color: 'white',
-                    borderRadius: '999px',
-                    padding: '2px 8px',
-                    fontSize: '12px',
+                    border: `1px solid ${colors.border}`,
+                    backgroundColor: colors.darkLight,
+                    color: colors.white,
+                    borderRadius: '6px',
+                    padding: '2px 7px',
+                    fontSize: '11px',
                     cursor: 'pointer',
                   }}
                 >

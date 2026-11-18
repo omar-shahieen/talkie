@@ -71,11 +71,14 @@ export default function OAuthCallbackView() {
       justifyContent="center"
       flexDirection="column"
       gap="14px"
-      backgroundColor="#1f2127"
-      color="white"
+      backgroundColor="#0B0D12"
+      backgroundImage="radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.14), transparent 55%)"
+      color="#F4F6FB"
     >
-      <Spinner thickness="3px" speed="0.7s" />
-      <Text>Completing sign in...</Text>
+      <Spinner size="lg" color="#6366F1" thickness="3px" speed="0.7s" />
+      <Text fontSize="sm" color="rgba(244, 246, 251, 0.72)">
+        Completing sign in...
+      </Text>
     </Box>
   );
 }

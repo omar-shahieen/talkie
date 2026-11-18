@@ -1,46 +1,71 @@
 import { useColorMode } from '@chakra-ui/react';
 
 export const colors = {
-  white: '#FFFFFF',
-  primary: '#7289DA',
-  dark: '#FFFFFF', // Mapping 'dark' to white for text in dark mode
-  darkLight: '#454545',
-  darkMedium: '#2C2F33',
-  darker: '#363738',
+  white: '#F3F4F6',
+  primary: '#5E6AD2',
+  dark: '#F3F4F6',
+  darkLight: '#1E222E',
+  darkMedium: '#171A23',
+  darker: '#12151C',
 
-  lightGray: '#b9bbbe',
-  grayLight: '#36393f',
-  grayMedium: '#2f3136',
-  grayDark: '#292b2f',
-  grayDarkest: '#202225',
+  lightGray: '#9CA3AF',
+  grayLight: '#12151C',
+  grayMedium: '#0E1015',
+  grayDark: '#0B0D12',
+  grayDarkest: '#08090D',
 
   // Semantic mappings
-  textMain: '#FFFFFF',
-  textDim: 'rgba(255, 255, 255, 0.7)',
-  textMuted: 'rgba(255, 255, 255, 0.5)',
-  bgMain: '#36393f',
+  textMain: '#F3F4F6',
+  textDim: '#9CA3AF',
+  textMuted: '#6B7280',
+  bgMain: '#12151C',
+
+  // Professional design tokens
+  border: 'rgba(255, 255, 255, 0.07)',
+  borderStrong: 'rgba(255, 255, 255, 0.13)',
+  surfaceElevated: '#171A23',
+  accent: '#5E6AD2',
+  accentHover: '#6E7AE2',
+  accentSoft: 'rgba(94, 106, 210, 0.14)',
+  danger: '#E11D48',
+  success: '#10B981',
+  warning: '#F59E0B',
+  glassBg: 'rgba(18, 21, 28, 0.85)',
+  messageHover: 'rgba(255, 255, 255, 0.024)',
 };
 
-// Light mode colors - properly inverted for light theme
 export const lightColors = {
-  white: '#060607',
-  primary: '#7289DA',
-  dark: '#060607', // Text color - black for readability
-  darkLight: '#E3E5E8', // Hover backgrounds - light gray
-  darkMedium: '#FFFFFF', // Containers - white
-  darker: '#F2F3F5',
+  white: '#111827',
+  primary: '#4F5BD5',
+  dark: '#111827',
+  darkLight: '#EDF0F5',
+  darkMedium: '#FFFFFF',
+  darker: '#F8F9FB',
 
-  lightGray: '#4f5660', // Dim text
-  grayLight: '#FFFFFF', // Main background - white
-  grayMedium: '#F2F3F5', // Sidebar background - light gray
-  grayDark: '#EBEDEF', // Slightly off-white
-  grayDarkest: '#E3E5E8', // Darker gray for some accents
+  lightGray: '#4B5563',
+  grayLight: '#FFFFFF',
+  grayMedium: '#F8F9FB',
+  grayDark: '#F1F3F7',
+  grayDarkest: '#E5E8F0',
 
   // Semantic mappings
-  textMain: '#060607',
-  textDim: 'rgba(6, 6, 7, 0.7)',
-  textMuted: 'rgba(6, 6, 7, 0.5)',
+  textMain: '#111827',
+  textDim: '#4B5563',
+  textMuted: '#6B7280',
   bgMain: '#FFFFFF',
+
+  // Professional design tokens
+  border: 'rgba(17, 24, 39, 0.08)',
+  borderStrong: 'rgba(17, 24, 39, 0.15)',
+  surfaceElevated: '#FFFFFF',
+  accent: '#4F5BD5',
+  accentHover: '#434EC2',
+  accentSoft: 'rgba(79, 91, 213, 0.1)',
+  danger: '#DC2626',
+  success: '#059669',
+  warning: '#D97706',
+  glassBg: 'rgba(255, 255, 255, 0.88)',
+  messageHover: 'rgba(17, 24, 39, 0.022)',
 };
 
 export function useThemedColors() {

@@ -1,6 +1,5 @@
-import { Avatar, Box, Text, Tooltip } from '@chakra-ui/react';
+import { Avatar, Badge, Box, HStack, Text, Tooltip } from '@chakra-ui/react';
 import React from 'react';
-
 import { useThemedColors } from '../theme/colors';
 
 export type AppMemberListItemProps = {
@@ -14,27 +13,60 @@ export default function AppMemberListItem({
 }: AppMemberListItemProps) {
   const colors = useThemedColors();
   return (
-    <Box
-      display="flex"
-      alignItems="center"
-      padding="5px"
-      marginY="5px"
-      borderRadius="3px"
+    <HStack
+      spacing="10px"
+      paddingX="8px"
+      paddingY="6px"
+      marginY="1px"
+      borderRadius="6px"
       cursor="pointer"
+      transition="background 0.12s ease"
       _hover={{
         backgroundColor: colors.darkLight,
       }}
     >
-      <Avatar size="sm" />
-      <Box width="10px" />
-      <Text color={colors.white}>{name}</Text>
+      <Box position="relative" flexShrink={0}>
+        <Avatar size="xs" name={name} />
+        <Box
+          position="absolute"
+          bottom="-1px"
+          right="-1px"
+          width="7px"
+          height="7px"
+          borderRadius="full"
+          backgroundColor={colors.success}
+          border="1.5px solid"
+          borderColor={colors.grayMedium}
+        />
+      </Box>
+      <Text
+        color={colors.textDim}
+        fontSize="xs"
+        fontWeight="500"
+        isTruncated
+        flex="1"
+      >
+        {name}
+      </Text>
       {isOwner ? (
-        <Box marginX="5px">
-          <Tooltip aria-label="server owner tooltip" label="Server owner">
-            👑
-          </Tooltip>
-        </Box>
+        <Tooltip
+          aria-label="server owner tooltip"
+          label="Workspace Owner"
+          hasArrow
+        >
+          <Badge
+            fontSize="9px"
+            px="5px"
+            py="1px"
+            borderRadius="4px"
+            backgroundColor={colors.accentSoft}
+            color={colors.accent}
+            textTransform="uppercase"
+          >
+            Owner
+          </Badge>
+        </Tooltip>
       ) : null}
-    </Box>
+    </HStack>
   );
 }

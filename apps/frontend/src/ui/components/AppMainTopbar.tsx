@@ -1,6 +1,5 @@
 import {
   AtSignIcon,
-  BellIcon,
   EmailIcon,
   MoonIcon,
   NotAllowedIcon,
@@ -13,8 +12,9 @@ import {
   Box,
   Divider,
   HStack,
-  IconButton,
   Input,
+  InputGroup,
+  InputLeftElement,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -26,12 +26,12 @@ import {
   useDisclosure,
   useToast,
 } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useThemedColors } from '../theme/colors';
 import AppIconButton from './AppIconButton';
 import AppNotificationCenter from './AppNotificationCenter';
-import { searchMessages } from '../../app/services/message.service';
+import { getChannel, searchMessages } from '../../app/services/message.service';
 
 type SearchResult = {
   id?: string;
@@ -109,131 +109,168 @@ export default function AppMainTopbar() {
   return (
     <>
       <Box
-        height="50px"
-        backgroundColor={colors.grayLight}
-        borderBottomColor="gray"
-        borderBottomWidth="1px"
+        height="52px"
+        minHeight="52px"
+        backgroundColor={colors.glassBg}
+        backdropFilter="blur(10px)"
+        borderBottom="1px solid"
+        borderColor={colors.border}
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        paddingX="10px"
+        paddingX="16px"
       >
-        <AppMainTopbarChannelName />
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          gap="8px"
-        >
+        <AppMainTopbarChannelName channelId={params.channelId} />
+
+        <HStack spacing="4px">
           <AppNotificationCenter />
           <AppIconButton
-            tooltip="Mute a channel"
+            tooltip="Mute channel"
             ariaLabel="Mute channel"
-            icon={<NotAllowedIcon />}
-          ></AppIconButton>
+            icon={<NotAllowedIcon boxSize={3.5} />}
+          />
           <AppIconButton
             tooltip="Pinned Messages"
             ariaLabel="View pinned messages"
-            icon={<AtSignIcon />}
-          ></AppIconButton>
-          <AppIconButton
-            tooltip="Member List"
-            ariaLabel="Toggle Memberlist"
-            icon={<StarIcon />}
-          ></AppIconButton>
-          <Input
-            placeholder="Search messages"
-            color={colors.white}
-            _placeholder={{ color: colors.textMuted }}
-            width="150px"
-            size="sm"
-            borderRadius="md"
-            borderColor="transparent"
-            backgroundColor={colors.grayDarkest}
-            value={query}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              setQuery(event.target.value)
-            }
-            onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
-              if (event.key === 'Enter') {
-                void runSearch();
-              }
-            }}
-            _focus={{
-              width: '225px',
-            }}
+            icon={<AtSignIcon boxSize={3.5} />}
           />
           <AppIconButton
-            tooltip="Search messages"
-            ariaLabel="Search messages"
-            icon={<SearchIcon />}
-            onClick={() => void runSearch()}
-          ></AppIconButton>
+            tooltip="Member Directory"
+            ariaLabel="Toggle Memberlist"
+            icon={<StarIcon boxSize={3.5} />}
+          />
+
+          <Divider
+            orientation="vertical"
+            height="18px"
+            borderColor={colors.border}
+            marginX="6px"
+          />
+
+          <InputGroup width="auto">
+            <InputLeftElement pointerEvents="none" height="30px">
+              <SearchIcon color={colors.textMuted} boxSize={3} />
+            </InputLeftElement>
+            <Input
+              placeholder="Search messages..."
+              color={colors.white}
+              _placeholder={{ color: colors.textMuted }}
+              width="180px"
+              height="30px"
+              fontSize="xs"
+              borderRadius="7px"
+              border="1px solid"
+              borderColor={colors.border}
+              backgroundColor={colors.grayDarkest}
+              value={query}
+              transition="all 0.15s ease"
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                setQuery(event.target.value)
+              }
+              onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>) => {
+                if (event.key === 'Enter') {
+                  void runSearch();
+                }
+              }}
+              _focus={{
+                width: '240px',
+                borderColor: colors.accent,
+                boxShadow: `0 0 0 1px ${colors.accent}`,
+              }}
+            />
+          </InputGroup>
+
           <AppIconButton
             tooltip="Inbox"
             ariaLabel="See inbox"
-            icon={<EmailIcon />}
-          ></AppIconButton>
+            icon={<EmailIcon boxSize={3.5} />}
+          />
           <AppIconButton
             tooltip="Help"
             ariaLabel="Open help"
-            icon={<QuestionIcon />}
+            icon={<QuestionIcon boxSize={3.5} />}
             onClick={onHelpOpen}
-          ></AppIconButton>
+          />
           <AppIconButton
-            tooltip={colorMode === 'dark' ? 'Light mode' : 'Dark mode'}
+            tooltip={colorMode === 'dark' ? 'Light theme' : 'Dark theme'}
             ariaLabel="Toggle theme"
-            icon={colorMode === 'dark' ? <SunIcon /> : <MoonIcon />}
+            icon={
+              colorMode === 'dark' ? (
+                <SunIcon boxSize={3.5} />
+              ) : (
+                <MoonIcon boxSize={3.5} />
+              )
+            }
             onClick={toggleColorMode}
-          ></AppIconButton>
-        </Box>
+          />
+        </HStack>
       </Box>
 
       <Modal isOpen={isOpen} onClose={onClose} size="lg" isCentered>
         <ModalOverlay />
-        <ModalContent backgroundColor={colors.grayLight} color={colors.dark}>
-          <ModalHeader>
-            Search results {searchTotal !== null ? `(${searchTotal})` : ''}
+        <ModalContent
+          backgroundColor={colors.surfaceElevated}
+          color={colors.white}
+          border="1px solid"
+          borderColor={colors.border}
+        >
+          <ModalHeader
+            fontSize="sm"
+            fontWeight="600"
+            borderBottom="1px solid"
+            borderColor={colors.border}
+          >
+            Search Results {searchTotal !== null ? `(${searchTotal})` : ''}
           </ModalHeader>
           <ModalCloseButton />
-          <ModalBody>
+          <ModalBody paddingY="16px">
             {isSearching ? (
-              <Text color="gray.400">Searching...</Text>
+              <Text color={colors.textDim} fontSize="xs">
+                Searching messages...
+              </Text>
             ) : results.length ? (
-              <Box>
+              <Box display="grid" gap="8px" maxH="400px" overflowY="auto">
                 {results.map((result, index) => (
-                  <Box key={result.id ?? `${index}`} marginBottom="10px">
-                    <Box
-                      padding="10px"
-                      borderRadius="md"
-                      backgroundColor={colors.grayDark}
-                      cursor="pointer"
-                      onClick={() => handleResultClick(result)}
-                    >
-                      <HStack justifyContent="space-between" alignItems="start">
-                        <Box>
-                          <Text fontSize="sm" fontWeight="bold">
-                            {result.content ??
-                              result.text ??
-                              'Untitled message'}
-                          </Text>
-                          <Text fontSize="xs" color="gray.400">
-                            Channel:{' '}
-                            {result.channelId ?? result.channel_id ?? 'unknown'}
-                          </Text>
-                        </Box>
-                        <Text fontSize="xs" color="gray.500">
-                          {result.createdAt ?? result.created_at ?? ''}
+                  <Box
+                    key={result.id ?? `${index}`}
+                    padding="10px 12px"
+                    borderRadius="8px"
+                    backgroundColor={colors.darkLight}
+                    border="1px solid"
+                    borderColor={colors.border}
+                    cursor="pointer"
+                    transition="border-color 0.14s ease"
+                    _hover={{ borderColor: colors.accent }}
+                    onClick={() => handleResultClick(result)}
+                  >
+                    <HStack justifyContent="space-between" alignItems="start">
+                      <Box minWidth={0}>
+                        <Text fontSize="xs" fontWeight="600">
+                          {result.content ?? result.text ?? 'Untitled message'}
                         </Text>
-                      </HStack>
-                    </Box>
-                    <Divider borderColor="gray.600" marginTop="10px" />
+                        <Text
+                          fontSize="11px"
+                          color={colors.textMuted}
+                          mt="2px"
+                        >
+                          Channel:{' '}
+                          {result.channelId ?? result.channel_id ?? 'unknown'}
+                        </Text>
+                      </Box>
+                      <Text
+                        fontSize="11px"
+                        color={colors.textMuted}
+                        flexShrink={0}
+                      >
+                        {result.createdAt ?? result.created_at ?? ''}
+                      </Text>
+                    </HStack>
                   </Box>
                 ))}
               </Box>
             ) : (
-              <Text color="gray.400">
-                No results yet. Search a message keyword above.
+              <Text color={colors.textDim} fontSize="xs">
+                No matching messages found.
               </Text>
             )}
           </ModalBody>
@@ -242,22 +279,34 @@ export default function AppMainTopbar() {
 
       <Modal isOpen={isHelpOpen} onClose={onHelpClose} size="md" isCentered>
         <ModalOverlay />
-        <ModalContent backgroundColor={colors.grayLight} color={colors.dark}>
-          <ModalHeader>Help</ModalHeader>
+        <ModalContent
+          backgroundColor={colors.surfaceElevated}
+          color={colors.white}
+          border="1px solid"
+          borderColor={colors.border}
+        >
+          <ModalHeader
+            fontSize="sm"
+            fontWeight="600"
+            borderBottom="1px solid"
+            borderColor={colors.border}
+          >
+            Workspace Guide
+          </ModalHeader>
           <ModalCloseButton />
-          <ModalBody paddingBottom="20px">
+          <ModalBody paddingY="16px">
             <Box display="grid" gap="10px">
-              <Text fontSize="sm" color="gray.300">
-                Search messages by typing a keyword and pressing Enter or the
-                search button.
+              <Text fontSize="xs" color={colors.textDim} lineHeight="1.6">
+                • Search messages across channels by typing a query and pressing
+                Enter.
               </Text>
-              <Text fontSize="sm" color="gray.300">
-                Use the notification bell to review unread activity in real
-                time.
+              <Text fontSize="xs" color={colors.textDim} lineHeight="1.6">
+                • Use the notification center to monitor mentions and unread
+                activity in real time.
               </Text>
-              <Text fontSize="sm" color="gray.300">
-                Mute, inbox, and pinned message actions will be connected here
-                when their handlers are added.
+              <Text fontSize="xs" color={colors.textDim} lineHeight="1.6">
+                • Hover over any message to add reactions, reply inline, or open
+                a dedicated discussion thread.
               </Text>
             </Box>
           </ModalBody>
@@ -267,21 +316,42 @@ export default function AppMainTopbar() {
   );
 }
 
-function AppMainTopbarChannelName() {
+function AppMainTopbarChannelName({ channelId }: { channelId?: string }) {
   const colors = useThemedColors();
+  const [channelName, setChannelName] = useState('general');
+
+  useEffect(() => {
+    let isMounted = true;
+    if (!channelId) {
+      setChannelName('general');
+      return;
+    }
+
+    getChannel(channelId)
+      .then((channel) => {
+        if (isMounted && channel?.name) {
+          setChannelName(channel.name);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setChannelName('general');
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [channelId]);
+
   return (
-    <Box display="flex" alignItems="center" cursor="default">
-      <Text
-        marginRight="10px"
-        fontStyle="italic"
-        color={colors.lightGray}
-        fontSize="xl"
-      >
+    <HStack spacing="8px" cursor="default" minWidth={0}>
+      <Text color={colors.textMuted} fontWeight="600" fontSize="md">
         #
       </Text>
-      <Text color={colors.white}>
-        💬-general (Server is hosted on Singapore region)
+      <Text color={colors.white} fontWeight="600" fontSize="sm" isTruncated>
+        {channelName}
       </Text>
-    </Box>
+    </HStack>
   );
 }

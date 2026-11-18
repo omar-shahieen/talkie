@@ -1,9 +1,7 @@
-import { Box, Text } from '@chakra-ui/react';
+import { Box, Skeleton, Stack, Text } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
-import AppMemberGroup from './AppMemberGroup';
 import AppMemberListItem from './AppMemberListItem';
 import { fetchCurrentUser } from '../../app/services/user.service';
-
 import { useThemedColors } from '../theme/colors';
 
 export default function AppMemberList() {
@@ -44,33 +42,40 @@ export default function AppMemberList() {
 
   return (
     <Box
-      paddingTop="15px"
+      paddingTop="16px"
       flexGrow={1}
       height="0px"
       display="flex"
-      overflowY="hidden"
+      overflowY="auto"
       flexDirection="column"
-      paddingX="5px"
-      _hover={{
-        overflowY: 'scroll',
-      }}
+      paddingX="6px"
     >
       {isLoading ? (
-        <Text color={colors.textDim} fontSize="sm" marginBottom="12px">
-          Loading members...
-        </Text>
+        <Stack spacing="10px" paddingX="6px">
+          <Skeleton height="14px" width="60%" borderRadius="6px" />
+          <Skeleton height="36px" borderRadius="8px" />
+          <Skeleton height="36px" borderRadius="8px" />
+        </Stack>
       ) : null}
 
       {errorMessage ? (
-        <Text color="red.300" fontSize="sm" marginBottom="12px">
+        <Text color="red.400" fontSize="xs" paddingX="6px" marginBottom="12px">
           {errorMessage}
         </Text>
       ) : null}
 
       {users.length ? (
-        <Box marginBottom="25px">
-          <Text color={colors.lightGray} fontSize="xs" fontWeight="bold">
-            MEMBERS - {users.length}
+        <Box marginBottom="24px">
+          <Text
+            color={colors.textMuted}
+            fontSize="11px"
+            fontWeight="700"
+            letterSpacing="0.06em"
+            textTransform="uppercase"
+            paddingX="8px"
+            marginBottom="8px"
+          >
+            Members — {users.length}
           </Text>
 
           {users.slice(0, 20).map((user) => (

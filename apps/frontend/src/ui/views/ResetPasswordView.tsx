@@ -59,23 +59,26 @@ export default function ResetPasswordView() {
       display="flex"
       alignItems="center"
       justifyContent="center"
-      backgroundColor="#1c1c1c"
+      backgroundColor="#0B0D12"
+      backgroundImage="radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.16), transparent 55%)"
       padding="24px"
     >
       <Box
         width="100%"
         maxW="420px"
-        backgroundColor="#2e2d2d"
-        borderRadius="12px"
-        padding="24px"
-        color="white"
+        backgroundColor="#1B1F2C"
+        border="1px solid rgba(255, 255, 255, 0.08)"
+        borderRadius="20px"
+        padding="32px"
+        color="#F4F6FB"
+        boxShadow="2xl"
       >
-        <Text fontSize="2xl" fontWeight="bold" marginBottom="16px">
+        <Text fontSize="2xl" fontWeight="bold" letterSpacing="-0.02em" marginBottom="6px">
           Reset Password
         </Text>
 
-        <Text marginBottom="16px" color="whiteAlpha.700">
-          Enter a new password for your account.
+        <Text marginBottom="20px" color="rgba(244, 246, 251, 0.65)" fontSize="sm">
+          Enter a new password for your Talkie account.
         </Text>
 
         <Input
@@ -83,6 +86,8 @@ export default function ResetPasswordView() {
           placeholder="New password"
           value={newPassword}
           onChange={(event) => setNewPassword(event.target.value)}
+          backgroundColor="#232838"
+          borderColor="rgba(255, 255, 255, 0.08)"
           marginBottom="12px"
         />
         <Input
@@ -90,17 +95,21 @@ export default function ResetPasswordView() {
           placeholder="Confirm password"
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
+          backgroundColor="#232838"
+          borderColor="rgba(255, 255, 255, 0.08)"
           marginBottom="16px"
         />
 
         {status ? (
-          <Text marginBottom="16px" color="yellow.300" fontSize="sm">
+          <Text marginBottom="16px" color="yellow.300" fontSize="xs">
             {status}
           </Text>
         ) : null}
 
         <Button
-          colorScheme="blue"
+          backgroundColor="#6366F1"
+          color="white"
+          _hover={{ backgroundColor: '#818CF8' }}
           width="full"
           onClick={submitResetPassword}
           isLoading={isSubmitting}
