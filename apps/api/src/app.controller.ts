@@ -2,10 +2,11 @@ import {
   Controller,
   Get,
   OnModuleDestroy,
-  Post,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { AppService, HealthCheckResult } from './app.service';
+import { HealthCheck, HealthCheckResult } from '@nestjs/terminus';
+import { AppService } from './app.service';
+import type { LivenessCheckResult } from './app.service';
 import { Public } from './auth/decorators/public.decorator';
 
 @Controller()
@@ -25,39 +26,27 @@ export class AppController implements OnModuleDestroy {
     return this.appService.getHello();
   }
 
+  // Liveness: process is up; never touches Postgres or Redis, so a dependency
+  // outage never makes the orchestrator restart healthy pods.
   @Get('health')
   @Public()
-  async health(): Promise<HealthCheckResult> {
-    // Readiness: report 503 while draining so load balancers stop routing here.
+  live(): LivenessCheckResult {
+    return this.appService.checkLiveness();
+  }
+
+  // Readiness: 503 while Postgres/Redis are down and while draining for shutdown.
+  @Get('ready')
+  @Public()
+  @HealthCheck()
+  async ready(): Promise<HealthCheckResult> {
     if (this.shuttingDown) {
       throw new ServiceUnavailableException({
         status: 'shutting_down',
-        checks: { postgres: 'down', redis: 'down' },
+        info: {},
+        error: {},
+        details: {},
       });
     }
-    const report = await this.appService.checkHealth();
-    if (report.status !== 'ok') {
-      throw new ServiceUnavailableException(report);
-    }
-    return report;
-  }
-
-  @Get('test-slow')
-  @Public()
-  async testSlow(): Promise<{ ok: boolean; duration: number }> {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return { ok: true, duration: 2000 };
-  }
-
-  @Post('test-shutdown')
-  @Public()
-  testShutdown(): { status: string; message: string } {
-    setTimeout(() => {
-      process.emit('SIGTERM');
-    }, 100);
-    return {
-      status: 'shutting_down',
-      message: 'Graceful shutdown initiated',
-    };
+    return this.appService.checkHealth();
   }
 }

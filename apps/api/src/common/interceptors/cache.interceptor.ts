@@ -11,10 +11,11 @@ export class HttpCacheInterceptor extends CacheInterceptor {
       return undefined;
     }
 
-    // Do not cache personal user profile or health/metrics probes
+    // Do not cache personal user profile or health/readiness/metrics probes
     if (
       req?.url?.includes('/users/me') ||
       req?.url?.startsWith('/health') ||
+      req?.url?.startsWith('/ready') ||
       req?.url?.startsWith('/metrics')
     ) {
       return undefined;

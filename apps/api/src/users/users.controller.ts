@@ -5,7 +5,6 @@ import { type AuthenticatedUser } from '../auth/types/authenticated-user.type';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UpdateUserDto } from './dtos/updateUser.dto';
 import { SearchUsersDto } from './dtos/search-users.dto';
-import { Throttle } from '@nestjs/throttler';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { RequireAppRole } from '../access-control/app-permissions/requireAppRole.decorator';
 import { AppRole } from './entities/user.entity';
@@ -35,7 +34,6 @@ export class UsersController {
 
   // GET /users/search?q=alice
   @Get('search')
-  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   searchUsers(
     @Query() query: SearchUsersDto,
     @CurrentUser() user: AuthenticatedUser,

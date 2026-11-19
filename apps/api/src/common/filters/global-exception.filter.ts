@@ -9,7 +9,13 @@ import {
 import { Request, Response } from 'express';
 import { AppException } from '../exceptions/app.exception';
 
-import { QueryFailedError } from 'typeorm';
+import {
+  CannotExecuteNotConnectedError,
+  DataSource,
+  QueryFailedError,
+  TypeORMError,
+} from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 import { LoggingService } from '../../logging/logging.service';
 import { ClsService } from 'nestjs-cls';
 import { ErrorResponseDto } from '../dto/error-response.dto';
@@ -27,6 +33,19 @@ interface PostgresDriverError {
   column?: string;
 }
 
+// Connection-level failures (DB restarting / network drop at runtime)
+const DB_CONNECTION_ERROR_CODES = new Set([
+  'ECONNREFUSED',
+  'ECONNRESET',
+  'ETIMEDOUT',
+  'EPIPE',
+  '57P01', // admin_shutdown
+  '57P02', // crash_shutdown
+  '57P03', // cannot_connect_now
+]);
+const DB_CONNECTION_ERROR_MESSAGE =
+  /Driver not Connected|Connection terminated|Client has encountered a connection error|timeout exceeded when trying to connect/i;
+
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
   constructor(
@@ -34,7 +53,36 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     private readonly config: ConfigService,
     private readonly logger: LoggingService,
     private readonly emiter: EventBusService,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
+
+  /**
+   * True when the failure means "the database is not reachable / not yet
+   * initialized" (startup still retrying, or a runtime drop). These are
+   * transient infrastructure conditions -> 503, not programmer errors -> 500.
+   */
+  private isDatabaseUnavailable(exception: unknown): boolean {
+    if (exception instanceof CannotExecuteNotConnectedError) return true;
+
+    // Before DataSource.initialize() finished, TypeORM has no entity metadata
+    // or driver pool, so queries fail with assorted TypeORMErrors.
+    if (exception instanceof TypeORMError && !this.dataSource?.isInitialized) {
+      return true;
+    }
+
+    if (!exception || typeof exception !== 'object') return false;
+    const e = exception as {
+      code?: string;
+      message?: string;
+      driverError?: { code?: string; message?: string };
+    };
+    const code = e.driverError?.code ?? e.code;
+    const message = e.driverError?.message ?? e.message ?? '';
+    return (
+      (typeof code === 'string' && DB_CONNECTION_ERROR_CODES.has(code)) ||
+      DB_CONNECTION_ERROR_MESSAGE.test(message)
+    );
+  }
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -231,6 +279,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           };
       }
     }
+    // Database unreachable / still initializing -> 503, tell clients to retry
+    if (this.isDatabaseUnavailable(exception)) {
+      return {
+        statusCode: HttpStatus.SERVICE_UNAVAILABLE,
+        errorCode: 'DATABASE_UNAVAILABLE',
+        message:
+          'The service is temporarily unavailable. Please retry shortly.',
+        isOperational: true,
+      };
+    }
+
     // Unknown / programming error
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
