@@ -301,7 +301,12 @@ export default function AdminManagementView() {
         <Text fontSize="xs" color="red.400" marginBottom="12px">
           Access restricted: administrator privileges are required.
         </Text>
-        <Link as={RouterLink} to="/settings" color={colors.accent} fontSize="xs">
+        <Link
+          as={RouterLink}
+          to="/settings"
+          color={colors.accent}
+          fontSize="xs"
+        >
           ← Return to Account Settings
         </Link>
       </Box>
@@ -320,11 +325,17 @@ export default function AdminManagementView() {
   return (
     <VStack align="stretch" spacing="24px" paddingBottom="48px">
       <Box>
-        <Heading size="md" color={colors.white} letterSpacing="-0.02em" marginBottom="4px">
+        <Heading
+          size="md"
+          color={colors.white}
+          letterSpacing="-0.02em"
+          marginBottom="4px"
+        >
           Administration & Access Control
         </Heading>
         <Text fontSize="xs" color={colors.textDim}>
-          Configure RBAC roles, bitmask permissions, and verify workspace policy enforcement.
+          Configure RBAC roles, bitmask permissions, and verify workspace policy
+          enforcement.
         </Text>
       </Box>
 
@@ -335,7 +346,12 @@ export default function AdminManagementView() {
         borderColor={colors.border}
         borderRadius="12px"
       >
-        <Text fontSize="sm" fontWeight="600" color={colors.white} marginBottom="4px">
+        <Text
+          fontSize="sm"
+          fontWeight="600"
+          color={colors.white}
+          marginBottom="4px"
+        >
           Roles & Permissions
         </Text>
         <Text fontSize="xs" color={colors.textMuted} marginBottom="16px">
@@ -399,7 +415,12 @@ export default function AdminManagementView() {
             border="1px solid"
             borderColor={colors.border}
           >
-            <Text fontSize="xs" fontWeight="600" color={colors.textDim} marginBottom="8px">
+            <Text
+              fontSize="xs"
+              fontWeight="600"
+              color={colors.textDim}
+              marginBottom="8px"
+            >
               Capability Flags
             </Text>
             <SimpleGrid columns={{ base: 2, md: 4 }} spacing="8px">
@@ -462,19 +483,39 @@ export default function AdminManagementView() {
             <Table size="sm" variant="simple">
               <Thead backgroundColor={colors.grayLight}>
                 <Tr>
-                  <Th color={colors.textMuted} borderColor={colors.border} fontSize="10px">
+                  <Th
+                    color={colors.textMuted}
+                    borderColor={colors.border}
+                    fontSize="10px"
+                  >
                     Name
                   </Th>
-                  <Th color={colors.textMuted} borderColor={colors.border} fontSize="10px">
+                  <Th
+                    color={colors.textMuted}
+                    borderColor={colors.border}
+                    fontSize="10px"
+                  >
                     Server
                   </Th>
-                  <Th color={colors.textMuted} borderColor={colors.border} fontSize="10px">
+                  <Th
+                    color={colors.textMuted}
+                    borderColor={colors.border}
+                    fontSize="10px"
+                  >
                     Position
                   </Th>
-                  <Th color={colors.textMuted} borderColor={colors.border} fontSize="10px">
+                  <Th
+                    color={colors.textMuted}
+                    borderColor={colors.border}
+                    fontSize="10px"
+                  >
                     Permissions
                   </Th>
-                  <Th color={colors.textMuted} borderColor={colors.border} fontSize="10px">
+                  <Th
+                    color={colors.textMuted}
+                    borderColor={colors.border}
+                    fontSize="10px"
+                  >
                     Actions
                   </Th>
                 </Tr>
@@ -485,18 +526,28 @@ export default function AdminManagementView() {
 
                   return (
                     <Tr key={role.id}>
-                      <Td borderColor={colors.border} fontSize="xs" fontWeight="600">
+                      <Td
+                        borderColor={colors.border}
+                        fontSize="xs"
+                        fontWeight="600"
+                      >
                         {isEditing ? (
                           <Input
                             {...inputProps}
                             value={editName}
-                            onChange={(event) => setEditName(event.target.value)}
+                            onChange={(event) =>
+                              setEditName(event.target.value)
+                            }
                           />
                         ) : (
                           role.name
                         )}
                       </Td>
-                      <Td borderColor={colors.border} fontSize="xs" color={colors.textDim}>
+                      <Td
+                        borderColor={colors.border}
+                        fontSize="xs"
+                        color={colors.textDim}
+                      >
                         {role.serverId}
                       </Td>
                       <Td borderColor={colors.border} fontSize="xs">
@@ -541,18 +592,20 @@ export default function AdminManagementView() {
                         ) : (
                           <HStack wrap="wrap" spacing="4px">
                             {fromPermissionString(role.permissions).length ? (
-                              fromPermissionString(role.permissions).map((perm) => (
-                                <Badge
-                                  key={perm}
-                                  fontSize="10px"
-                                  borderRadius="4px"
-                                  backgroundColor={colors.accentSoft}
-                                  color={colors.accent}
-                                  textTransform="none"
-                                >
-                                  {perm}
-                                </Badge>
-                              ))
+                              fromPermissionString(role.permissions).map(
+                                (perm) => (
+                                  <Badge
+                                    key={perm}
+                                    fontSize="10px"
+                                    borderRadius="4px"
+                                    backgroundColor={colors.accentSoft}
+                                    color={colors.accent}
+                                    textTransform="none"
+                                  >
+                                    {perm}
+                                  </Badge>
+                                ),
+                              )
                             ) : (
                               <Text fontSize="xs" color={colors.textMuted}>
                                 None
@@ -590,7 +643,10 @@ export default function AdminManagementView() {
                               variant="outline"
                               borderColor={colors.border}
                               color={colors.textDim}
-                              _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                              _hover={{
+                                backgroundColor: colors.darkLight,
+                                color: colors.white,
+                              }}
                             >
                               Edit
                             </Button>
@@ -600,7 +656,9 @@ export default function AdminManagementView() {
                             variant="outline"
                             borderColor="rgba(225, 29, 72, 0.35)"
                             color="red.400"
-                            _hover={{ backgroundColor: 'rgba(225, 29, 72, 0.14)' }}
+                            _hover={{
+                              backgroundColor: 'rgba(225, 29, 72, 0.14)',
+                            }}
                             onClick={() => void submitRoleDelete(role.id)}
                             isLoading={isSubmitting}
                           >
@@ -624,11 +682,17 @@ export default function AdminManagementView() {
         borderColor={colors.border}
         borderRadius="12px"
       >
-        <Text fontSize="sm" fontWeight="600" color={colors.white} marginBottom="4px">
+        <Text
+          fontSize="sm"
+          fontWeight="600"
+          color={colors.white}
+          marginBottom="4px"
+        >
           Access Control Diagnostics
         </Text>
         <Text fontSize="xs" color={colors.textMuted} marginBottom="16px">
-          Verify effective application-level and server-level permissions for any user.
+          Verify effective application-level and server-level permissions for
+          any user.
         </Text>
 
         <HStack spacing="10px" marginBottom="14px">

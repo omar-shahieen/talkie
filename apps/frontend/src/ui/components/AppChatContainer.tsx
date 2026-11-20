@@ -517,7 +517,12 @@ export default function AppChatContainer({
         ) : (
           <Center height="100%" padding="24px">
             <Box textAlign="center" maxW="340px">
-              <Text color={colors.white} fontWeight="600" fontSize="md" mb="4px">
+              <Text
+                color={colors.white}
+                fontWeight="600"
+                fontSize="md"
+                mb="4px"
+              >
                 No messages yet
               </Text>
               <Text color={colors.textMuted} fontSize="sm">
@@ -699,9 +704,16 @@ function AppMessageContainer({
           marginTop="2px"
         />
         <Box flex="1" minWidth={0}>
-          <Box justifyContent="start" alignItems="baseline" display="flex" gap="8px">
+          <Box
+            justifyContent="start"
+            alignItems="baseline"
+            display="flex"
+            gap="8px"
+          >
             <Text color={colors.white} fontSize="sm" fontWeight="600">
-              <Link _hover={{ textDecoration: 'underline', color: colors.accent }}>
+              <Link
+                _hover={{ textDecoration: 'underline', color: colors.accent }}
+              >
                 {message.app_users?.name}
               </Link>
             </Text>
@@ -763,11 +775,21 @@ function AppMessageContainer({
           ) : (
             <Box marginTop="2px">
               {message.parentMessageId ? (
-                <Text fontSize="xs" color={colors.accent} marginBottom="4px" fontWeight="500">
+                <Text
+                  fontSize="xs"
+                  color={colors.accent}
+                  marginBottom="4px"
+                  fontWeight="500"
+                >
                   ↳ Replying in thread
                 </Text>
               ) : null}
-              <Text fontSize="sm" color={colors.textDim} lineHeight="1.55" whiteSpace="pre-wrap">
+              <Text
+                fontSize="sm"
+                color={colors.textDim}
+                lineHeight="1.55"
+                whiteSpace="pre-wrap"
+              >
                 {message.text}
               </Text>
             </Box>
@@ -791,7 +813,11 @@ function AppMessageContainer({
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <Text color={colors.accentHover} fontSize="xs" fontWeight="500">
+                    <Text
+                      color={colors.accentHover}
+                      fontSize="xs"
+                      fontWeight="500"
+                    >
                       {attachment.fileName ?? attachment.url}
                     </Text>
                   </a>
@@ -808,7 +834,9 @@ function AppMessageContainer({
                   onClick={() => onToggleReaction(message.id!, reaction.emoji)}
                   style={{
                     border: '1px solid',
-                    borderColor: reaction.reactedByMe ? colors.accent : colors.border,
+                    borderColor: reaction.reactedByMe
+                      ? colors.accent
+                      : colors.border,
                     backgroundColor: reaction.reactedByMe
                       ? colors.accentSoft
                       : colors.surfaceElevated,

@@ -73,11 +73,20 @@ export default function ResetPasswordView() {
         color="#F4F6FB"
         boxShadow="2xl"
       >
-        <Text fontSize="2xl" fontWeight="bold" letterSpacing="-0.02em" marginBottom="6px">
+        <Text
+          fontSize="2xl"
+          fontWeight="bold"
+          letterSpacing="-0.02em"
+          marginBottom="6px"
+        >
           Reset Password
         </Text>
 
-        <Text marginBottom="20px" color="rgba(244, 246, 251, 0.65)" fontSize="sm">
+        <Text
+          marginBottom="20px"
+          color="rgba(244, 246, 251, 0.65)"
+          fontSize="sm"
+        >
           Enter a new password for your Talkie account.
         </Text>
 

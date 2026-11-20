@@ -586,7 +586,10 @@ export default function LoginView() {
                 variant="ghost"
                 size="sm"
                 color={colors.textDim}
-                _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                _hover={{
+                  backgroundColor: colors.darkLight,
+                  color: colors.white,
+                }}
                 onClick={submitPasswordResetRequest}
               >
                 Forgot password?

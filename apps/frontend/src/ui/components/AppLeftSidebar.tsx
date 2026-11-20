@@ -248,12 +248,7 @@ function BottomSection() {
           />
         </Box>
         <Box minWidth={0}>
-          <Text
-            color={colors.white}
-            fontSize="xs"
-            fontWeight="600"
-            isTruncated
-          >
+          <Text color={colors.white} fontSize="xs" fontWeight="600" isTruncated>
             {user?.name || user?.email || 'Guest'}
           </Text>
           <HStack spacing="5px">

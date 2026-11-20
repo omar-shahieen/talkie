@@ -248,11 +248,7 @@ export default function AppMainTopbar() {
                         <Text fontSize="xs" fontWeight="600">
                           {result.content ?? result.text ?? 'Untitled message'}
                         </Text>
-                        <Text
-                          fontSize="11px"
-                          color={colors.textMuted}
-                          mt="2px"
-                        >
+                        <Text fontSize="11px" color={colors.textMuted} mt="2px">
                           Channel:{' '}
                           {result.channelId ?? result.channel_id ?? 'unknown'}
                         </Text>
