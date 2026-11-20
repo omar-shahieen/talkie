@@ -1,16 +1,17 @@
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import {
+  HealthCheckResult,
+  HealthCheckService,
+  HealthIndicatorResult,
+  HealthIndicatorService,
+  TypeOrmHealthIndicator,
+} from '@nestjs/terminus';
+import type { Redis } from 'ioredis';
+import { REDIS_HEALTH_CLIENT } from './common/config/redis-clients';
 
-export type DependencyState = 'up' | 'down';
-
-export interface HealthCheckResult {
-  status: 'ok' | 'degraded' | 'shutting_down';
-  checks: {
-    postgres: DependencyState;
-    redis: DependencyState;
-  };
+export interface LivenessCheckResult {
+  status: 'ok';
+  uptime: number;
 }
 
 @Injectable()
@@ -18,50 +19,45 @@ export class AppService {
   private static readonly PROBE_TIMEOUT_MS = 2000;
 
   constructor(
-    @InjectDataSource() private readonly dataSource: DataSource,
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    private readonly health: HealthCheckService,
+    private readonly db: TypeOrmHealthIndicator,
+    private readonly healthIndicatorService: HealthIndicatorService,
+    @Inject(REDIS_HEALTH_CLIENT) private readonly redis: Redis,
   ) {}
 
   getHello(): string {
     return 'Hello World!';
   }
 
+  /** Liveness: process is up. Must never touch Postgres or Redis. */
+  checkLiveness(): LivenessCheckResult {
+    return { status: 'ok', uptime: Math.floor(process.uptime()) };
+  }
+
+  /** Readiness: can this instance serve traffic right now? */
   async checkHealth(): Promise<HealthCheckResult> {
-    const [postgres, redis] = await Promise.all([
-      this.probeWithTimeout(() => this.checkPostgres()),
-      this.probeWithTimeout(() => this.checkRedis()),
+    return this.health.check([
+      () =>
+        this.db.pingCheck('postgres', {
+          timeout: AppService.PROBE_TIMEOUT_MS,
+        }),
+      () => this.checkRedis(),
     ]);
-
-    const allUp = postgres === 'up' && redis === 'up';
-    return {
-      status: allUp ? 'ok' : 'degraded',
-      checks: { postgres, redis },
-    };
   }
 
-  private async checkPostgres(): Promise<void> {
-    if (!this.dataSource?.isInitialized) {
-      throw new Error('DataSource not initialized');
+  private async checkRedis(): Promise<HealthIndicatorResult> {
+    const indicator = this.healthIndicatorService.check('redis');
+
+    if (this.redis.status !== 'ready') {
+      return indicator.down({
+        message: `Redis client not ready (${this.redis.status})`,
+      });
     }
-    await this.dataSource.query('SELECT 1');
-  }
 
-  private async checkRedis(): Promise<void> {
-    const key = 'health:ping';
-    await this.cache.set(key, 'pong', 5000);
-    const val = await this.cache.get<string>(key);
-    if (val !== 'pong') {
-      throw new Error('Redis ping value mismatch');
-    }
-  }
-
-  private async probeWithTimeout(
-    fn: () => Promise<void>,
-  ): Promise<DependencyState> {
     let timer: NodeJS.Timeout | undefined;
     try {
-      await Promise.race([
-        fn(),
+      const reply = await Promise.race([
+        this.redis.ping(),
         new Promise<never>((_, reject) => {
           timer = setTimeout(
             () => reject(new Error('Health check probe timed out')),
@@ -69,9 +65,17 @@ export class AppService {
           );
         }),
       ]);
-      return 'up';
-    } catch {
-      return 'down';
+
+      if (reply !== 'PONG') {
+        return indicator.down({ message: 'Redis ping value mismatch' });
+      }
+
+      return indicator.up();
+    } catch (error) {
+      return indicator.down({
+        message:
+          error instanceof Error ? error.message : 'Redis health check failed',
+      });
     } finally {
       if (timer) clearTimeout(timer);
     }

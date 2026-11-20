@@ -25,6 +25,7 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 !.env.example
+secret.env
 
 # Local runtime & uploads
 uploads/

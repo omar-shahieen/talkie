@@ -1,12 +1,22 @@
 import type { ConnectionOptions } from 'bullmq';
+import type { RedisOptions } from 'ioredis';
 
 /**
- * Converts a REDIS_URL (redis:// or rediss://) into BullMQ/ioredis
- * connection options. `rediss://` enables TLS.
+ * Runtime reconnect delay for ioredis clients: exponential backoff
+ * (500ms, 1s, 2s, 4s, 8s ...) capped at 10s, with +-25% jitter.
+ */
+export function redisRetryDelay(times: number): number {
+  const exponential = Math.min(10_000, 500 * 2 ** Math.max(0, times - 1));
+  return Math.floor(exponential * (0.75 + Math.random() * 0.5));
+}
+
+/**
+ * Converts a REDIS_URL (redis:// or rediss://) into ioredis options.
+ * `rediss://` enables TLS.
  *
  * Example: rediss://default:secret@host:6379/0
  */
-export function redisOptionsFromUrl(redisUrl: string): ConnectionOptions {
+export function ioRedisOptionsFromUrl(redisUrl: string): RedisOptions {
   const url = new URL(redisUrl);
 
   const dbPath = url.pathname.replace('/', '');
@@ -19,5 +29,11 @@ export function redisOptionsFromUrl(redisUrl: string): ConnectionOptions {
     password: url.password ? decodeURIComponent(url.password) : undefined,
     ...(db !== undefined && !Number.isNaN(db) ? { db } : {}),
     ...(url.protocol === 'rediss:' ? { tls: {} } : {}),
+    retryStrategy: redisRetryDelay,
   };
+}
+
+/** BullMQ/ioredis connection options (same shape, BullMQ typing). */
+export function redisOptionsFromUrl(redisUrl: string): ConnectionOptions {
+  return ioRedisOptionsFromUrl(redisUrl) as unknown as ConnectionOptions;
 }

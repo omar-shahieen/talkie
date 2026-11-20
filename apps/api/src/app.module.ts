@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TerminusModule } from '@nestjs/terminus';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuditModule } from './audit/audit.module';
@@ -20,8 +21,6 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { NotificationsModule } from './notifications/notifications.module';
 import { PresenceModule } from './presence/presence.module';
 import { BullModule } from '@nestjs/bullmq';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { InvitationsModule } from './invitations/invitations.module';
 import { FriendsModule } from './friends/friends.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -36,41 +35,33 @@ import { FilesModule } from './files/files.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 import { MetricsModule } from './common/metrics/metrics.module';
 import { createKeyv } from '@keyv/redis';
+import { LoggingService } from './logging/logging.service';
 import { redisOptionsFromUrl } from './common/config/redis-url';
-
-function getDatabaseUrl(config: ConfigService): string {
-  const dbUrl = config.get<string>('DATABASE_URL');
-  if (dbUrl) return dbUrl;
-  const host = config.get<string>('DB_HOST', 'localhost');
-  const port = config.get<number>('DB_PORT', 5432);
-  const user = config.get<string>('DB_USERNAME', 'postgres');
-  const pass = config.get<string>('DB_PASSWORD', 'postgres');
-  const name = config.get<string>('DB_NAME', 'talkie');
-  return `postgres://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@${host}:${port}/${name}`;
-}
-
-function getRedisUrl(config: ConfigService): string {
-  const redisUrl = config.get<string>('REDIS_URL');
-  if (redisUrl) return redisUrl;
-  const host = config.get<string>('REDIS_HOST', 'localhost');
-  const port = config.get<number>('REDIS_PORT', 6379);
-  const pass = config.get<string>('REDIS_PASSWORD');
-  const isTls = config.get<string>('REDIS_TLS') === 'true';
-  const protocol = isTls ? 'rediss' : 'redis';
-  const auth = pass ? `:${encodeURIComponent(pass)}@` : '';
-  return `${protocol}://${auth}${host}:${port}`;
-}
+import { getDatabaseUrl, getRedisUrl } from './common/config/connection-urls';
+import {
+  attachErrorLogging,
+  createHealthRedisClient,
+  REDIS_HEALTH_CLIENT,
+} from './common/config/redis-clients';
 
 @Module({
   imports: [
+    TerminusModule,
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        stores: [createKeyv(getRedisUrl(config))],
-        ttl: config.get<number>('CACHE_TTL', 5000), // in milliseconds
-      }),
+      inject: [ConfigService, LoggingService],
+      useFactory: (config: ConfigService, logger: LoggingService) => {
+        const redisUrl = getRedisUrl(config);
+        const keyv = createKeyv(redisUrl);
+        // runtime Redis drops must log, not crash with an unhandled 'error'
+        attachErrorLogging(keyv, 'RedisCache', logger);
+        attachErrorLogging(keyv.store as never, 'RedisCacheStore', logger);
+        return {
+          stores: [keyv],
+          ttl: config.get<number>('CACHE_TTL', 5000), // in milliseconds
+        };
+      },
     }),
 
     ConfigModule.forRoot({
@@ -79,12 +70,28 @@ function getRedisUrl(config: ConfigService): string {
     }),
 
     TypeOrmModule.forRootAsync({
-      // postgress
+      // postgres
       imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      inject: [ConfigService, LoggingService],
+      useFactory: (config: ConfigService, logger: LoggingService) => ({
         type: 'postgres',
         url: getDatabaseUrl(config),
+        retryAttempts: Number(config.get('DB_RETRY_ATTEMPTS') ?? 10),
+        retryDelay: Number(config.get('DB_RETRY_DELAY_MS') ?? 3000),
+        // pool + runtime resilience
+        poolSize: Number(config.get('DB_POOL_MAX') || 20),
+        connectTimeoutMS: Number(
+          config.get('DB_CONNECT_TIMEOUT_PER_ATTEMPT_MS') || 5000,
+        ),
+        extra: {
+          idleTimeoutMillis: 30_000,
+          keepAlive: true,
+          keepAliveInitialDelayMillis: 10_000,
+        },
+        // idle client errors (DB restart, network drop) must not crash the
+        // process; pg.Pool evicts the broken client and reconnects on demand
+        poolErrorHandler: (error: Error) =>
+          logger.warn(`Postgres pool error: ${error.message}`, 'Postgres'),
         autoLoadEntities: true,
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         subscribers: [__dirname + '/**/*.subscriber{.ts,.js}'],
@@ -97,7 +104,7 @@ function getRedisUrl(config: ConfigService): string {
               ? 'false'
               : 'true')) === 'true',
 
-        // logging: true,
+        logging: config.get<boolean>('DB_LOGGING') || false,
       }),
     }),
 
@@ -114,23 +121,6 @@ function getRedisUrl(config: ConfigService): string {
           removeOnComplete: 300,
           removeOnFail: 300,
         },
-      }),
-    }),
-
-    // rate limiter
-
-    ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        throttlers: [
-          {
-            name: 'short',
-            ttl: Number(config.get('THROTTLE_TTL') || 1000), // 1 second default window
-            limit: Number(config.get('THROTTLE_LIMIT') || 50), // stay under 50 req/s global limit
-          },
-        ],
-        storage: new ThrottlerStorageRedisService(getRedisUrl(config)),
       }),
     }),
 
@@ -177,7 +167,12 @@ function getRedisUrl(config: ConfigService): string {
   controllers: [AppController],
   providers: [
     AppService,
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    {
+      provide: REDIS_HEALTH_CLIENT,
+      inject: [ConfigService, LoggingService],
+      useFactory: (config: ConfigService, logger: LoggingService) =>
+        createHealthRedisClient(getRedisUrl(config), logger),
+    },
     { provide: APP_GUARD, useClass: AuthJwtGuard },
     { provide: APP_GUARD, useClass: ServerPermissionsGuard },
     { provide: APP_GUARD, useClass: AppPermissionsGuard },
