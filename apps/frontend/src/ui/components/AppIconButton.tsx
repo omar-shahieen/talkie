@@ -18,40 +18,35 @@ export default function AppIconButton({
   icon,
   onClick,
   withBackground,
-  size,
+  size = 'sm',
   tooltip,
   disabled,
   ...rest
 }: AppIconButtonProps) {
   const colors = useThemedColors();
   return (
-    <Tooltip label={tooltip}>
+    <Tooltip label={tooltip} hasArrow placement="top">
       <IconButton
         aria-label={ariaLabel}
         icon={icon}
         onClick={onClick}
-        borderRadius="50%"
+        borderRadius="10px"
         marginX="1px"
         size={size}
         isDisabled={disabled}
-        backgroundColor={!withBackground ? 'transparent' : colors.darkLight}
-        color={colors.white}
+        backgroundColor={withBackground ? colors.darkLight : 'transparent'}
+        color={colors.textDim}
+        transition="all 0.16s ease"
         {...rest}
-        _active={
-          !withBackground
-            ? {
-                background: 'none',
-              }
-            : {}
-        }
-        _hover={
-          !withBackground
-            ? {
-                background: 'transparent',
-              }
-            : {}
-        }
-      ></IconButton>
+        _hover={{
+          backgroundColor: colors.darkLight,
+          color: colors.white,
+        }}
+        _active={{
+          transform: 'scale(0.95)',
+          backgroundColor: colors.darkLight,
+        }}
+      />
     </Tooltip>
   );
 }

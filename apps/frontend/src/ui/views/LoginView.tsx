@@ -318,45 +318,73 @@ export default function LoginView() {
       alignItems="center"
       justifyContent="center"
       backgroundColor={colors.grayDarkest}
+      backgroundImage="radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.16), transparent 55%)"
       padding="24px"
     >
       <Box
         width="100%"
         maxW="420px"
-        backgroundColor={colors.grayMedium}
-        borderRadius="12px"
-        padding="28px"
+        backgroundColor={colors.surfaceElevated}
+        border="1px solid"
+        borderColor={colors.border}
+        borderRadius="14px"
+        padding="32px"
         color={colors.white}
-        boxShadow="xl"
+        boxShadow="2xl"
       >
         <Box
           display="flex"
           flexDirection="column"
           alignItems="center"
-          marginBottom="14px"
+          marginBottom="22px"
         >
-          <Image
-            src="/talkie-logo.png"
-            alt="Talkie logo"
-            boxSize="72px"
-            borderRadius="18px"
-            objectFit="cover"
-            marginBottom="10px"
-          />
-          <Heading size="lg" marginBottom="6px">
+          <Box
+            p="2px"
+            borderRadius="14px"
+            border="1px solid"
+            borderColor={colors.borderStrong}
+            backgroundColor={colors.darkLight}
+            marginBottom="12px"
+          >
+            <Image
+              src="/talkie-logo.png"
+              alt="Talkie logo"
+              boxSize="52px"
+              borderRadius="12px"
+              objectFit="cover"
+            />
+          </Box>
+          <Heading size="md" letterSpacing="-0.02em" marginBottom="4px">
             Talkie
           </Heading>
-          <Text color={colors.textDim} fontSize="sm" textAlign="center">
+          <Text color={colors.textDim} fontSize="xs" textAlign="center">
             {authMode === 'signin'
-              ? 'Sign in to continue'
-              : 'Create an account'}
+              ? 'Sign in to your workspace account'
+              : 'Create a new workspace account'}
           </Text>
         </Box>
 
-        <ButtonGroup size="sm" marginBottom="20px" isAttached variant="outline">
+        <Box
+          display="flex"
+          padding="4px"
+          borderRadius="12px"
+          backgroundColor={colors.grayDarkest}
+          border="1px solid"
+          borderColor={colors.border}
+          marginBottom="20px"
+        >
           <Button
             flex="1"
-            colorScheme={authMode === 'signin' ? 'blue' : 'gray'}
+            size="sm"
+            borderRadius="9px"
+            backgroundColor={
+              authMode === 'signin' ? colors.accent : 'transparent'
+            }
+            color={authMode === 'signin' ? 'white' : colors.textDim}
+            _hover={{
+              backgroundColor:
+                authMode === 'signin' ? colors.accentHover : colors.darkLight,
+            }}
             onClick={() => {
               setAuthMode('signin');
               setAuthStatus('');
@@ -366,7 +394,16 @@ export default function LoginView() {
           </Button>
           <Button
             flex="1"
-            colorScheme={authMode === 'signup' ? 'blue' : 'gray'}
+            size="sm"
+            borderRadius="9px"
+            backgroundColor={
+              authMode === 'signup' ? colors.accent : 'transparent'
+            }
+            color={authMode === 'signup' ? 'white' : colors.textDim}
+            _hover={{
+              backgroundColor:
+                authMode === 'signup' ? colors.accentHover : colors.darkLight,
+            }}
             onClick={() => {
               setAuthMode('signup');
               setAuthStatus('');
@@ -374,23 +411,34 @@ export default function LoginView() {
           >
             Sign up
           </Button>
-        </ButtonGroup>
+        </Box>
 
         {authStatus ? (
-          <Text color="yellow.300" marginBottom="12px" fontSize="sm">
-            {authStatus}
-          </Text>
+          <Box
+            padding="10px 12px"
+            borderRadius="10px"
+            backgroundColor="rgba(245, 158, 11, 0.12)"
+            border="1px solid rgba(245, 158, 11, 0.3)"
+            marginBottom="16px"
+          >
+            <Text color="yellow.300" fontSize="xs">
+              {authStatus}
+            </Text>
+          </Box>
         ) : null}
 
-        <VStack spacing="12px" align="stretch">
+        <VStack spacing="14px" align="stretch">
           {tfaLoginToken ? (
             <FormControl>
-              <FormLabel>TFA Code</FormLabel>
+              <FormLabel fontSize="xs" color={colors.textDim}>
+                TFA Code
+              </FormLabel>
               <Input
                 value={tfaToken}
                 onChange={(e) => setTfaToken(e.target.value)}
                 placeholder="123456"
                 backgroundColor={colors.darkLight}
+                borderColor={colors.border}
               />
             </FormControl>
           ) : null}
@@ -399,31 +447,40 @@ export default function LoginView() {
             <>
               <Box display="flex" gap="12px">
                 <FormControl>
-                  <FormLabel>First Name</FormLabel>
+                  <FormLabel fontSize="xs" color={colors.textDim}>
+                    First Name
+                  </FormLabel>
                   <Input
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="First name"
                     backgroundColor={colors.darkLight}
+                    borderColor={colors.border}
                   />
                 </FormControl>
                 <FormControl>
-                  <FormLabel>Last Name</FormLabel>
+                  <FormLabel fontSize="xs" color={colors.textDim}>
+                    Last Name
+                  </FormLabel>
                   <Input
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Last name"
                     backgroundColor={colors.darkLight}
+                    borderColor={colors.border}
                   />
                 </FormControl>
               </Box>
               <FormControl>
-                <FormLabel>Username</FormLabel>
+                <FormLabel fontSize="xs" color={colors.textDim}>
+                  Username
+                </FormLabel>
                 <Input
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="username"
                   backgroundColor={colors.darkLight}
+                  borderColor={colors.border}
                 />
               </FormControl>
             </>
@@ -432,23 +489,29 @@ export default function LoginView() {
           {!tfaLoginToken ? (
             <>
               <FormControl>
-                <FormLabel>Email</FormLabel>
+                <FormLabel fontSize="xs" color={colors.textDim}>
+                  Email
+                </FormLabel>
                 <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   backgroundColor={colors.darkLight}
+                  borderColor={colors.border}
                 />
               </FormControl>
               <FormControl>
-                <FormLabel>Password</FormLabel>
+                <FormLabel fontSize="xs" color={colors.textDim}>
+                  Password
+                </FormLabel>
                 <Input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   backgroundColor={colors.darkLight}
+                  borderColor={colors.border}
                 />
               </FormControl>
             </>
@@ -456,61 +519,98 @@ export default function LoginView() {
 
           {authMode === 'signup' && !tfaLoginToken ? (
             <FormControl>
-              <FormLabel>Confirm Password</FormLabel>
+              <FormLabel fontSize="xs" color={colors.textDim}>
+                Confirm Password
+              </FormLabel>
               <Input
                 type="password"
                 value={passwordConfirm}
                 onChange={(e) => setPasswordConfirm(e.target.value)}
                 placeholder="••••••••"
                 backgroundColor={colors.darkLight}
+                borderColor={colors.border}
               />
             </FormControl>
           ) : null}
         </VStack>
 
-        <ButtonGroup spacing={3} marginTop="20px" width="full" flexWrap="wrap">
-          {tfaLoginToken ? (
-            <Button variant="outline" onClick={() => setTfaLoginToken('')}>
-              Back
-            </Button>
-          ) : authMode === 'signin' ? (
-            <Button variant="ghost" onClick={submitPasswordResetRequest}>
-              Forgot password
-            </Button>
-          ) : null}
-
-          {!tfaLoginToken ? (
-            <Button variant="outline" onClick={loginWithGoogle}>
-              Google
-            </Button>
-          ) : null}
-
+        <VStack spacing="10px" marginTop="22px" align="stretch">
           {tfaLoginToken ? (
             <Button
-              colorScheme="blue"
+              backgroundColor={colors.accent}
+              color="white"
+              _hover={{ backgroundColor: colors.accentHover }}
               onClick={submitTfa}
               isLoading={isSigningIn}
+              width="full"
             >
               Verify TFA
             </Button>
           ) : authMode === 'signin' ? (
             <Button
-              colorScheme="blue"
+              backgroundColor={colors.accent}
+              color="white"
+              _hover={{ backgroundColor: colors.accentHover }}
               onClick={submitLogin}
               isLoading={isSigningIn}
+              width="full"
             >
               Sign In
             </Button>
           ) : (
             <Button
-              colorScheme="blue"
+              backgroundColor={colors.accent}
+              color="white"
+              _hover={{ backgroundColor: colors.accentHover }}
               onClick={submitSignup}
               isLoading={isSigningIn}
+              width="full"
             >
-              Sign Up
+              Create Account
             </Button>
           )}
-        </ButtonGroup>
+
+          <ButtonGroup spacing={2} width="full">
+            {tfaLoginToken ? (
+              <Button
+                flex="1"
+                variant="outline"
+                borderColor={colors.border}
+                onClick={() => setTfaLoginToken('')}
+              >
+                Back
+              </Button>
+            ) : authMode === 'signin' ? (
+              <Button
+                flex="1"
+                variant="ghost"
+                size="sm"
+                color={colors.textDim}
+                _hover={{
+                  backgroundColor: colors.darkLight,
+                  color: colors.white,
+                }}
+                onClick={submitPasswordResetRequest}
+              >
+                Forgot password?
+              </Button>
+            ) : null}
+
+            {!tfaLoginToken ? (
+              <Button
+                flex="1"
+                variant="outline"
+                size="sm"
+                borderColor={colors.border}
+                color={colors.white}
+                _hover={{ backgroundColor: colors.darkLight }}
+                onClick={loginWithGoogle}
+              >
+                Continue with Google
+              </Button>
+            ) : null}
+          </ButtonGroup>
+        </VStack>
       </Box>
     </Box>
   );

@@ -12,7 +12,6 @@ import {
   PopoverContent,
   PopoverHeader,
   PopoverBody,
-  PopoverArrow,
   PopoverCloseButton,
   Spinner,
   Center,
@@ -151,13 +150,12 @@ export default function AppNotificationCenter({
 
   const markAllAsRead = async () => {
     const unreadIds = notifications.filter((n) => !n.isRead).map((n) => n.id);
-
     await Promise.all(unreadIds.map((id) => markAsRead(id)));
   };
 
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead) {
-      markAsRead(notification.id);
+      void markAsRead(notification.id);
     }
 
     if (onNotificationClick) {
@@ -188,7 +186,7 @@ export default function AppNotificationCenter({
       isOpen={isOpen}
       onClose={() => setIsOpen(false)}
       initialFocusRef={initialRef}
-      placement="bottom-start"
+      placement="bottom-end"
     >
       <PopoverTrigger>
         <Box
@@ -200,22 +198,24 @@ export default function AppNotificationCenter({
           justifyContent="center"
           width="32px"
           height="32px"
-          borderRadius="6px"
-          _hover={{ backgroundColor: colors.darkLight }}
+          borderRadius="8px"
+          color={colors.textDim}
+          _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+          transition="all 0.14s ease"
           title="Notifications"
         >
-          <BellIcon color={colors.white} fontSize="18px" />
+          <BellIcon boxSize={4} />
           {hasUnread && (
             <Badge
               position="absolute"
-              top="-4px"
-              right="-4px"
-              backgroundColor="#f04747"
+              top="2px"
+              right="2px"
+              backgroundColor={colors.accent}
               color="white"
               borderRadius="full"
-              padding="1px 4px"
-              fontSize="10px"
-              fontWeight="bold"
+              padding="0px 4px"
+              fontSize="9px"
+              fontWeight="600"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
@@ -224,19 +224,23 @@ export default function AppNotificationCenter({
       </PopoverTrigger>
 
       <PopoverContent
-        backgroundColor={colors.darkMedium}
-        borderColor={colors.darkLight}
+        backgroundColor={colors.surfaceElevated}
+        borderColor={colors.border}
+        borderRadius="12px"
+        boxShadow="2xl"
         width="360px"
-        maxHeight="500px"
+        maxHeight="480px"
         display="flex"
         flexDirection="column"
+        overflow="hidden"
       >
-        <PopoverArrow backgroundColor={colors.darkMedium} />
         <PopoverHeader
           borderBottomWidth="1px"
-          borderBottomColor={colors.darkLight}
+          borderBottomColor={colors.border}
           color={colors.white}
-          fontWeight="bold"
+          fontWeight="600"
+          fontSize="xs"
+          padding="12px 14px"
           display="flex"
           justifyContent="space-between"
           alignItems="center"
@@ -246,40 +250,41 @@ export default function AppNotificationCenter({
             <Button
               size="xs"
               variant="ghost"
-              color={colors.textDim}
-              _hover={{ color: colors.white }}
+              fontSize="11px"
+              color={colors.accent}
+              _hover={{ color: colors.accentHover, bg: colors.accentSoft }}
               onClick={markAllAsRead}
+              marginRight="20px"
             >
               Mark all read
             </Button>
           )}
         </PopoverHeader>
 
-        <PopoverCloseButton color={colors.white} />
+        <PopoverCloseButton color={colors.textDim} top="8px" />
 
-        <PopoverBody padding="0px" overflowY="auto" maxHeight="400px" flex="1">
+        <PopoverBody padding="0px" overflowY="auto" maxHeight="380px" flex="1">
           {isLoading ? (
             <VStack spacing="8px" align="stretch" padding="12px">
-              <Skeleton height="40px" borderRadius="md" />
-              <Skeleton height="40px" borderRadius="md" />
-              <Skeleton height="40px" borderRadius="md" />
-              <Center>
-                <Spinner size="sm" color={colors.primary} />
+              <Skeleton height="44px" borderRadius="8px" />
+              <Skeleton height="44px" borderRadius="8px" />
+              <Center py="2">
+                <Spinner size="sm" color={colors.accent} />
               </Center>
             </VStack>
           ) : errorMessage ? (
             <Center height="120px" flexDirection="column" gap="10px">
-              <Text color="red.200" fontSize="sm">
+              <Text color="red.400" fontSize="xs">
                 {errorMessage}
               </Text>
-              <Button size="sm" onClick={() => void fetchNotificationsList()}>
+              <Button size="xs" onClick={() => void fetchNotificationsList()}>
                 Retry
               </Button>
             </Center>
           ) : notifications.length === 0 ? (
-            <Center height="100px">
-              <Text color={colors.textMuted} fontSize="sm">
-                No notifications
+            <Center height="110px">
+              <Text color={colors.textMuted} fontSize="xs">
+                You are all caught up.
               </Text>
             </Center>
           ) : (
@@ -287,19 +292,17 @@ export default function AppNotificationCenter({
               {notifications.map((notification, index) => (
                 <Box
                   key={notification.id}
-                  padding="12px"
+                  padding="12px 14px"
                   borderBottomWidth={
                     index < notifications.length - 1 ? '1px' : '0px'
                   }
-                  borderBottomColor={colors.darkLight}
+                  borderBottomColor={colors.border}
                   backgroundColor={
-                    notification.isRead
-                      ? 'transparent'
-                      : 'rgba(79, 84, 92, 0.2)'
+                    notification.isRead ? 'transparent' : colors.accentSoft
                   }
                   cursor="pointer"
                   _hover={{ backgroundColor: colors.darkLight }}
-                  transition="background-color 0.2s"
+                  transition="background-color 0.14s ease"
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <HStack
@@ -307,17 +310,17 @@ export default function AppNotificationCenter({
                     align="flex-start"
                     spacing="8px"
                   >
-                    <VStack align="start" spacing="4px" flex="1">
+                    <VStack align="start" spacing="3px" flex="1">
                       <HStack justify="space-between" width="100%">
                         <Text
                           color={colors.white}
-                          fontWeight={notification.isRead ? 'normal' : 'bold'}
-                          fontSize="sm"
+                          fontWeight={notification.isRead ? '500' : '600'}
+                          fontSize="xs"
                           flex="1"
                         >
                           {notification.title}
                         </Text>
-                        <Text color={colors.textMuted} fontSize="xs">
+                        <Text color={colors.textMuted} fontSize="11px">
                           {formatTime(notification.created_at)}
                         </Text>
                       </HStack>
@@ -327,12 +330,12 @@ export default function AppNotificationCenter({
                     </VStack>
                     {!notification.isRead && (
                       <Box
-                        width="8px"
-                        height="8px"
+                        width="7px"
+                        height="7px"
                         borderRadius="full"
-                        backgroundColor="#5865f2"
+                        backgroundColor={colors.accent}
                         flexShrink={0}
-                        marginTop="4px"
+                        marginTop="5px"
                       />
                     )}
                   </HStack>

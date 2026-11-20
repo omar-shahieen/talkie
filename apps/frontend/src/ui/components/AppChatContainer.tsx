@@ -510,26 +510,38 @@ export default function AppChatContainer({
         {/* Messages */}
         {isLoading ? (
           <Center height="100%">
-            <Spinner size="xl" color={colors.primary} />
+            <Spinner size="lg" color={colors.accent} thickness="3px" />
           </Center>
         ) : hasMessages ? (
           <MessageList />
         ) : (
-          <Center height="100vh">
-            <Text color={colors.white}>No messages</Text>
+          <Center height="100%" padding="24px">
+            <Box textAlign="center" maxW="340px">
+              <Text
+                color={colors.white}
+                fontWeight="600"
+                fontSize="md"
+                mb="4px"
+              >
+                No messages yet
+              </Text>
+              <Text color={colors.textMuted} fontSize="sm">
+                Start the conversation by sending the first message below.
+              </Text>
+            </Box>
           </Center>
         )}
       </Box>
 
       {typingLabel && (
         <Box
-          marginY="5px"
+          marginY="4px"
           display="flex"
           justifyContent="start"
           alignItems="center"
-          paddingX="15px"
+          paddingX="20px"
         >
-          <Text color={colors.textDim} fontSize="sm" fontStyle="italic">
+          <Text color={colors.accent} fontSize="xs" fontWeight="500">
             {typingLabel}
           </Text>
         </Box>
@@ -672,56 +684,71 @@ function AppMessageContainer({
   return (
     <Box
       position="relative"
-      paddingY="5px"
+      paddingY="2px"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
       {/* Message Content */}
       <Box
         display="flex"
-        paddingX="15px"
-        paddingY="5px"
-        _hover={{ backgroundColor: colors.darkLight }}
+        paddingX="20px"
+        paddingY="8px"
+        transition="background 0.12s ease"
+        _hover={{ backgroundColor: colors.messageHover }}
       >
         <Avatar
+          size="sm"
           src={message.app_users?.avatar}
           name={message.app_users?.name}
-          marginRight="15px"
+          marginRight="14px"
+          marginTop="2px"
         />
-        <Box flex="1">
-          <Box justifyContent="start" alignItems="end" display="flex">
-            <Text color={colors.white} fontSize="xs" fontWeight="bold">
-              <Link>{message.app_users?.name}</Link>
+        <Box flex="1" minWidth={0}>
+          <Box
+            justifyContent="start"
+            alignItems="baseline"
+            display="flex"
+            gap="8px"
+          >
+            <Text color={colors.white} fontSize="sm" fontWeight="600">
+              <Link
+                _hover={{ textDecoration: 'underline', color: colors.accent }}
+              >
+                {message.app_users?.name}
+              </Link>
             </Text>
-            <Box width="10px" />
-            <Text fontSize="12px" color={colors.textMuted}>
+            <Text fontSize="11px" color={colors.textMuted}>
               {date}
             </Text>
           </Box>
           {isEditing ? (
-            <Box display="flex" gap="8px" marginTop="5px">
+            <Box display="flex" gap="8px" marginTop="6px">
               <input
                 type="text"
                 value={editText}
                 onChange={(e) => setEditText(e.target.value)}
                 style={{
                   flex: 1,
-                  padding: '5px',
-                  borderRadius: '4px',
-                  border: 'none',
+                  padding: '8px 12px',
+                  borderRadius: '10px',
+                  border: `1px solid ${colors.border}`,
+                  backgroundColor: colors.darkLight,
+                  color: colors.white,
                   fontSize: '14px',
+                  outline: 'none',
                 }}
               />
               <button
                 onClick={saveEdit}
                 style={{
-                  padding: '5px 10px',
-                  backgroundColor: '#43b581',
+                  padding: '6px 14px',
+                  backgroundColor: colors.success,
                   color: 'white',
                   border: 'none',
-                  borderRadius: '4px',
+                  borderRadius: '8px',
                   cursor: 'pointer',
                   fontSize: '12px',
+                  fontWeight: 600,
                 }}
               >
                 Save
@@ -732,47 +759,65 @@ function AppMessageContainer({
                   setEditText(message.text);
                 }}
                 style={{
-                  padding: '5px 10px',
-                  backgroundColor: '#f04747',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
+                  padding: '6px 14px',
+                  backgroundColor: colors.darkLight,
+                  color: colors.textDim,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '8px',
                   cursor: 'pointer',
                   fontSize: '12px',
+                  fontWeight: 600,
                 }}
               >
                 Cancel
               </button>
             </Box>
           ) : (
-            <Box>
+            <Box marginTop="2px">
               {message.parentMessageId ? (
-                <Text fontSize="xs" color={colors.textDim} marginBottom="4px">
-                  Replying in thread
+                <Text
+                  fontSize="xs"
+                  color={colors.accent}
+                  marginBottom="4px"
+                  fontWeight="500"
+                >
+                  ↳ Replying in thread
                 </Text>
               ) : null}
-              <Text fontSize="sm" color={colors.white}>
+              <Text
+                fontSize="sm"
+                color={colors.textDim}
+                lineHeight="1.55"
+                whiteSpace="pre-wrap"
+              >
                 {message.text}
               </Text>
             </Box>
           )}
 
           {message.attachments?.length ? (
-            <Box marginTop="8px">
+            <Box marginTop="8px" display="flex" flexWrap="wrap" gap="8px">
               {message.attachments.map((attachment) => (
                 <Box
                   key={attachment.id ?? attachment.url}
-                  marginTop="4px"
-                  padding="8px"
-                  borderRadius="md"
-                  backgroundColor={colors.darkLight}
+                  padding="8px 12px"
+                  borderRadius="10px"
+                  backgroundColor={colors.surfaceElevated}
+                  border="1px solid"
+                  borderColor={colors.border}
+                  _hover={{ borderColor: colors.accent }}
+                  transition="border-color 0.14s ease"
                 >
                   <a
                     href={normalizeBlobUrl(attachment.url)}
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <Text color="blue.300" fontSize="sm">
+                    <Text
+                      color={colors.accentHover}
+                      fontSize="xs"
+                      fontWeight="500"
+                    >
                       {attachment.fileName ?? attachment.url}
                     </Text>
                   </a>
@@ -789,13 +834,15 @@ function AppMessageContainer({
                   onClick={() => onToggleReaction(message.id!, reaction.emoji)}
                   style={{
                     border: '1px solid',
-                    borderColor: reaction.reactedByMe ? '#43b581' : '#4f545c',
+                    borderColor: reaction.reactedByMe
+                      ? colors.accent
+                      : colors.border,
                     backgroundColor: reaction.reactedByMe
-                      ? '#2f3136'
-                      : '#202225',
-                    color: 'white',
+                      ? colors.accentSoft
+                      : colors.surfaceElevated,
+                    color: colors.white,
                     borderRadius: '999px',
-                    padding: '2px 8px',
+                    padding: '2px 10px',
                     fontSize: '12px',
                     cursor: 'pointer',
                   }}
@@ -811,9 +858,9 @@ function AppMessageContainer({
                     onClick={() => onToggleReaction(message.id!, emoji)}
                     title={`React with ${emoji}`}
                     style={{
-                      border: '1px solid #4f545c',
-                      backgroundColor: '#202225',
-                      color: 'white',
+                      border: `1px solid ${colors.border}`,
+                      backgroundColor: colors.surfaceElevated,
+                      color: colors.white,
                       borderRadius: '999px',
                       padding: '2px 8px',
                       fontSize: '12px',
@@ -829,13 +876,14 @@ function AppMessageContainer({
                   <button
                     onClick={() => onReply(message)}
                     style={{
-                      border: '1px solid #4f545c',
-                      backgroundColor: '#202225',
-                      color: 'white',
+                      border: `1px solid ${colors.border}`,
+                      backgroundColor: colors.surfaceElevated,
+                      color: colors.textDim,
                       borderRadius: '999px',
-                      padding: '2px 8px',
+                      padding: '2px 10px',
                       fontSize: '12px',
                       cursor: 'pointer',
+                      fontWeight: 500,
                     }}
                   >
                     Reply
@@ -843,17 +891,18 @@ function AppMessageContainer({
                   <button
                     onClick={() => onOpenThread(message)}
                     style={{
-                      border: '1px solid #4f545c',
-                      backgroundColor: '#202225',
-                      color: 'white',
+                      border: `1px solid ${colors.border}`,
+                      backgroundColor: colors.surfaceElevated,
+                      color: colors.textDim,
                       borderRadius: '999px',
-                      padding: '2px 8px',
+                      padding: '2px 10px',
                       fontSize: '12px',
                       cursor: 'pointer',
+                      fontWeight: 500,
                     }}
                     title="View thread"
                   >
-                    🧵
+                    Thread
                   </button>
                 </>
               )}
@@ -866,13 +915,17 @@ function AppMessageContainer({
       {canDeleteOwnMessage && isHovering && !isEditing && (
         <Box
           position="absolute"
-          top="10px"
-          right="15px"
+          top="-10px"
+          right="20px"
           display="flex"
-          gap="5px"
-          backgroundColor={colors.darkMedium}
-          padding="5px"
-          borderRadius="4px"
+          gap="4px"
+          backgroundColor={colors.surfaceElevated}
+          border="1px solid"
+          borderColor={colors.border}
+          padding="4px 6px"
+          borderRadius="10px"
+          boxShadow="lg"
+          backdropFilter="blur(8px)"
         >
           {canEditOwnMessage ? (
             <button
@@ -881,13 +934,14 @@ function AppMessageContainer({
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#43b581',
+                color: colors.textDim,
                 cursor: 'pointer',
-                fontSize: '14px',
-                padding: '2px 4px',
+                fontSize: '12px',
+                padding: '3px 7px',
+                fontWeight: 600,
               }}
             >
-              📝
+              Edit
             </button>
           ) : null}
           <button
@@ -896,13 +950,14 @@ function AppMessageContainer({
             style={{
               background: 'none',
               border: 'none',
-              color: '#f04747',
+              color: colors.danger,
               cursor: 'pointer',
-              fontSize: '14px',
-              padding: '2px 4px',
+              fontSize: '12px',
+              padding: '3px 7px',
+              fontWeight: 600,
             }}
           >
-            🗑️
+            Delete
           </button>
           {canDeleteForEveryone && (
             <button
@@ -911,14 +966,14 @@ function AppMessageContainer({
               style={{
                 background: 'none',
                 border: 'none',
-                color: '#faa61a',
+                color: colors.warning,
                 cursor: 'pointer',
                 fontSize: '12px',
-                padding: '2px 4px',
+                padding: '3px 7px',
                 fontWeight: 600,
               }}
             >
-              🗑️ All
+              Delete All
             </button>
           )}
         </Box>

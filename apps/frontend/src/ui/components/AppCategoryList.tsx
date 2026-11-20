@@ -1,4 +1,4 @@
-import { Box, Text } from '@chakra-ui/react';
+import { Box, Skeleton, Stack, Text } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import AppCategoryChannelList from './AppCategoryChannelList';
 import {
@@ -8,8 +8,10 @@ import {
 } from '../../app/services/server.service';
 import { useAuth } from '../../hooks/useAuth';
 import { getAccessToken } from '../../app/authStorage';
+import { useThemedColors } from '../theme/colors';
 
 export default function AppCategoryList() {
+  const colors = useThemedColors();
   const user = useAuth();
   const [servers, setServers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -64,18 +66,21 @@ export default function AppCategoryList() {
 
   if (isLoading) {
     return (
-      <Box flexGrow={1} paddingTop="10px" paddingX="10px">
-        <Text color="whiteAlpha.600" fontSize="sm">
-          Loading servers...
-        </Text>
+      <Box flexGrow={1} padding="14px 12px">
+        <Stack spacing="10px">
+          <Skeleton height="16px" width="55%" borderRadius="6px" />
+          <Skeleton height="32px" borderRadius="8px" />
+          <Skeleton height="32px" borderRadius="8px" />
+          <Skeleton height="32px" borderRadius="8px" />
+        </Stack>
       </Box>
     );
   }
 
   if (errorMessage) {
     return (
-      <Box flexGrow={1} paddingTop="10px" paddingX="10px">
-        <Text color="red.300" fontSize="sm">
+      <Box flexGrow={1} padding="14px 12px">
+        <Text color="red.400" fontSize="xs">
           {errorMessage}
         </Text>
       </Box>
@@ -84,8 +89,8 @@ export default function AppCategoryList() {
 
   if (!servers.length) {
     return (
-      <Box flexGrow={1} paddingTop="10px" paddingX="10px">
-        <Text color="whiteAlpha.600" fontSize="sm">
+      <Box flexGrow={1} padding="14px 12px">
+        <Text color={colors.textMuted} fontSize="xs">
           No servers available.
         </Text>
       </Box>
@@ -97,13 +102,11 @@ export default function AppCategoryList() {
       flexGrow={1}
       height="0px"
       display="flex"
-      overflow="hidden"
-      _hover={{
-        overflowY: 'scroll',
-      }}
+      overflowY="auto"
       flexDirection="column"
-      paddingTop="10px"
-      paddingX="5px"
+      paddingY="12px"
+      paddingX="8px"
+      gap="12px"
     >
       {servers.map((server, idx) => (
         <AppCategoryChannelList key={server.id || idx} server={server} />

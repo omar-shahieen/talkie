@@ -1,7 +1,7 @@
 import { CloseIcon } from '@chakra-ui/icons';
 import { Box, Divider, Link, Text, IconButton } from '@chakra-ui/react';
 import React from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import { useThemedColors } from '../theme/colors';
 import { logoutApi } from '../../app/services/auth-api.service';
 import { disconnectSockets } from '../../app/realtime';
@@ -15,29 +15,34 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
   const navigate = useNavigate();
 
   return (
-    <Box display="flex" height="100vh">
+    <Box display="flex" height="100vh" backgroundColor={colors.grayLight}>
       <SettingsLeftSidebar />
       <Box
         flex="2"
         height="100%"
         backgroundColor={colors.grayLight}
-        overflowY="scroll"
-        paddingX="30px"
-        paddingY="50px"
-        color={colors.dark}
+        overflowY="auto"
+        paddingX={{ base: '20px', md: '40px' }}
+        paddingY="48px"
+        color={colors.white}
         position="relative"
       >
-        <Box position="absolute" top="20px" right="30px">
+        <Box position="absolute" top="20px" right="28px">
           <IconButton
             aria-label="Close Settings"
-            icon={<CloseIcon />}
-            variant="ghost"
-            color="gray.400"
-            _hover={{ color: colors.dark, backgroundColor: 'whiteAlpha.200' }}
+            icon={<CloseIcon boxSize={3.5} />}
+            variant="outline"
+            borderRadius="full"
+            borderColor={colors.border}
+            color={colors.textDim}
+            _hover={{
+              color: colors.white,
+              backgroundColor: colors.darkLight,
+            }}
             onClick={() => navigate('/')}
           />
         </Box>
-        {children}
+        <Box maxW="860px">{children}</Box>
       </Box>
     </Box>
   );
@@ -46,38 +51,49 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
 function SettingsLeftSidebar() {
   const colors = useThemedColors();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/settings/admin');
+
   return (
     <Box
       flex="1"
+      maxW="320px"
+      minW="220px"
       display="flex"
       justifyContent="flex-end"
       alignItems="start"
       height="100%"
-      backgroundColor={colors.grayDark}
-      paddingY="50px"
-      paddingX="15px"
-      overflow="hidden"
-      _hover={{
-        overflowY: 'scroll',
-      }}
+      backgroundColor={colors.grayMedium}
+      borderRight="1px solid"
+      borderColor={colors.border}
+      paddingY="48px"
+      paddingX="16px"
+      overflowY="auto"
     >
-      <Box display="flex" flexDirection="column">
+      <Box display="flex" flexDirection="column" width="100%" maxW="210px">
         <SettingsListHeader>User Settings</SettingsListHeader>
 
-        <SettingsListItem label="My Account" active />
+        <Link
+          as={RouterLink}
+          to="/settings"
+          _hover={{ textDecoration: 'none' }}
+        >
+          <SettingsListItem label="My Account" active={!isAdminRoute} />
+        </Link>
+
         <Link
           as={RouterLink}
           to="/settings/admin"
           _hover={{ textDecoration: 'none' }}
         >
-          <SettingsListItem label="Admin Management" />
+          <SettingsListItem label="Admin Management" active={isAdminRoute} />
         </Link>
 
         <AppSettingsDivider />
 
         <SettingsListItem
-          color="red.600"
-          hoverBackgroundColor="red.900"
+          color="red.400"
+          hoverBackgroundColor="rgba(244, 63, 94, 0.14)"
           onClick={async () => {
             await logoutApi().catch(() => {});
             disconnectSockets();
@@ -116,18 +132,22 @@ function SettingsListItem({
   return (
     <Box
       onClick={onClick}
-      paddingX="5px"
-      paddingRight="100px"
-      paddingY="5px"
+      paddingX="12px"
+      paddingY="8px"
       marginY="2px"
-      borderRadius="sm"
+      borderRadius="8px"
       cursor="pointer"
-      color={color ? color : active ? colors.dark : 'whiteAlpha.500'}
-      backgroundColor={active ? colors.lightGray : 'transparent'}
+      fontSize="sm"
+      fontWeight={active ? '600' : '500'}
+      color={color ? color : active ? colors.white : colors.textDim}
+      backgroundColor={active ? colors.accentSoft : 'transparent'}
+      transition="all 0.14s ease"
       _hover={{
         backgroundColor: hoverBackgroundColor
           ? hoverBackgroundColor
-          : colors.grayLight,
+          : active
+            ? colors.accentSoft
+            : colors.darkLight,
       }}
     >
       <Text>{label ? label : children}</Text>
@@ -140,13 +160,16 @@ type SettingsListHeaderProps = {
 };
 
 function SettingsListHeader({ children }: SettingsListHeaderProps) {
+  const colors = useThemedColors();
   return (
     <Text
-      color="gray"
-      fontWeight="bold"
+      color={colors.textMuted}
+      fontWeight="700"
       textTransform="uppercase"
-      fontSize="xs"
-      marginY="5px"
+      letterSpacing="0.06em"
+      fontSize="11px"
+      paddingX="12px"
+      marginBottom="8px"
     >
       {children}
     </Text>
@@ -154,9 +177,10 @@ function SettingsListHeader({ children }: SettingsListHeaderProps) {
 }
 
 function AppSettingsDivider() {
+  const colors = useThemedColors();
   return (
     <Box>
-      <Divider marginY="15px" />
+      <Divider marginY="14px" borderColor={colors.border} />
     </Box>
   );
 }
