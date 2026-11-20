@@ -27,14 +27,20 @@ export default function NotFoundView() {
         textAlign="center"
         maxW="400px"
       >
-        <Text fontSize="xs" fontWeight="700" color={colors.accent} letterSpacing="0.1em">
+        <Text
+          fontSize="xs"
+          fontWeight="700"
+          color={colors.accent}
+          letterSpacing="0.1em"
+        >
           404
         </Text>
         <Heading size="lg" color={colors.white}>
           Page Not Found
         </Heading>
         <Text fontSize="sm" color={colors.textDim}>
-          The channel or page you are looking for does not exist or has been moved.
+          The channel or page you are looking for does not exist or has been
+          moved.
         </Text>
         <Button
           marginTop="8px"

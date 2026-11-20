@@ -194,7 +194,12 @@ export default function AppChatInput({
   }, []);
 
   return (
-    <Box paddingX="16px" paddingBottom="16px" paddingTop="6px" backgroundColor={colors.grayLight}>
+    <Box
+      paddingX="16px"
+      paddingBottom="16px"
+      paddingTop="6px"
+      backgroundColor={colors.grayLight}
+    >
       {replyTarget ? (
         <Box
           marginBottom="8px"
@@ -286,7 +291,11 @@ export default function AppChatInput({
           icon={<CalendarIcon boxSize={3.5} />}
           onClick={openFilePicker}
         />
-        <AppIconButton ariaLabel="Mention" tooltip="Mention" icon={<AtSignIcon boxSize={3.5} />} />
+        <AppIconButton
+          ariaLabel="Mention"
+          tooltip="Mention"
+          icon={<AtSignIcon boxSize={3.5} />}
+        />
         <AppIconButton
           ariaLabel="Send message"
           tooltip="Send"

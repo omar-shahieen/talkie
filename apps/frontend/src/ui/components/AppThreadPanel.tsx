@@ -293,7 +293,12 @@ function ThreadMessageItem({
         marginTop="2px"
       />
       <Box flex="1">
-        <Box justifyContent="start" alignItems="center" display="flex" gap="8px">
+        <Box
+          justifyContent="start"
+          alignItems="center"
+          display="flex"
+          gap="8px"
+        >
           <Text color={colors.white} fontSize="xs" fontWeight="600">
             <Link>{message.app_users?.name}</Link>
           </Text>
@@ -312,7 +317,12 @@ function ThreadMessageItem({
             </Badge>
           )}
         </Box>
-        <Text fontSize="sm" color={colors.textDim} marginTop="4px" lineHeight="1.5">
+        <Text
+          fontSize="sm"
+          color={colors.textDim}
+          marginTop="4px"
+          lineHeight="1.5"
+        >
           {message.text}
         </Text>
 

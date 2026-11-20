@@ -580,13 +580,24 @@ function SettingsView() {
 
   return (
     <VStack align="stretch" spacing="24px" paddingBottom="48px">
-      <HStack justifyContent="space-between" alignItems="flex-start" flexWrap="wrap" gap="12px">
+      <HStack
+        justifyContent="space-between"
+        alignItems="flex-start"
+        flexWrap="wrap"
+        gap="12px"
+      >
         <Box>
-          <Heading size="md" color={colors.white} letterSpacing="-0.02em" mb="4px">
+          <Heading
+            size="md"
+            color={colors.white}
+            letterSpacing="-0.02em"
+            mb="4px"
+          >
             Account & Workspace Settings
           </Heading>
           <Text fontSize="xs" color={colors.textDim}>
-            Manage security credentials, workspaces, channels, directory connections, and invitations.
+            Manage security credentials, workspaces, channels, directory
+            connections, and invitations.
           </Text>
         </Box>
         {isAdmin ? (
@@ -728,7 +739,10 @@ function SettingsView() {
                 variant="outline"
                 borderColor={colors.border}
                 color={colors.textDim}
-                _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                _hover={{
+                  backgroundColor: colors.darkLight,
+                  color: colors.white,
+                }}
                 onClick={() => verifyTfa('disable')}
               >
                 Disable TFA
@@ -815,7 +829,12 @@ function SettingsView() {
                 gap="8px"
               >
                 <Box minW={0}>
-                  <Text fontSize="xs" fontWeight="600" color={colors.white} isTruncated>
+                  <Text
+                    fontSize="xs"
+                    fontWeight="600"
+                    color={colors.white}
+                    isTruncated
+                  >
                     {server.name ?? server.id}
                   </Text>
                   <Text fontSize="11px" color={colors.textMuted} isTruncated>
@@ -828,7 +847,10 @@ function SettingsView() {
                     variant="outline"
                     borderColor={colors.border}
                     color={colors.textDim}
-                    _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                    _hover={{
+                      backgroundColor: colors.darkLight,
+                      color: colors.white,
+                    }}
                     onClick={() => renameServer(server.id)}
                   >
                     Rename
@@ -838,7 +860,10 @@ function SettingsView() {
                     variant="outline"
                     borderColor={colors.border}
                     color={colors.textDim}
-                    _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                    _hover={{
+                      backgroundColor: colors.darkLight,
+                      color: colors.white,
+                    }}
                     onClick={() => leaveServer(server.id)}
                   >
                     Leave
@@ -925,7 +950,12 @@ function SettingsView() {
                   <Text color={colors.textMuted} fontSize="xs" fontWeight="600">
                     #
                   </Text>
-                  <Text fontSize="xs" fontWeight="500" color={colors.white} isTruncated>
+                  <Text
+                    fontSize="xs"
+                    fontWeight="500"
+                    color={colors.white}
+                    isTruncated
+                  >
                     {channel.name ?? channel.id}
                   </Text>
                 </HStack>
@@ -935,7 +965,10 @@ function SettingsView() {
                     variant="outline"
                     borderColor={colors.border}
                     color={colors.textDim}
-                    _hover={{ backgroundColor: colors.darkLight, color: colors.white }}
+                    _hover={{
+                      backgroundColor: colors.darkLight,
+                      color: colors.white,
+                    }}
                     onClick={() => renameChannel(channel.id)}
                   >
                     Rename
@@ -1003,7 +1036,8 @@ function SettingsView() {
 
         {selectedFriendUser ? (
           <Text fontSize="xs" color={colors.accent} mb="10px">
-            Selected: {selectedFriendUser.firstName} {selectedFriendUser.lastName} (
+            Selected: {selectedFriendUser.firstName}{' '}
+            {selectedFriendUser.lastName} (
             {selectedFriendUser.username ||
               selectedFriendUser.email ||
               selectedFriendUser.id}
@@ -1032,7 +1066,9 @@ function SettingsView() {
               >
                 <Box>
                   <Text fontSize="xs" fontWeight="600" color={colors.white}>
-                    {[user.firstName, user.lastName].filter(Boolean).join(' ') ||
+                    {[user.firstName, user.lastName]
+                      .filter(Boolean)
+                      .join(' ') ||
                       user.username ||
                       'Unknown user'}
                   </Text>
@@ -1069,7 +1105,12 @@ function SettingsView() {
             border="1px solid"
             borderColor={colors.border}
           >
-            <Text fontSize="xs" fontWeight="600" color={colors.textDim} mb="8px">
+            <Text
+              fontSize="xs"
+              fontWeight="600"
+              color={colors.textDim}
+              mb="8px"
+            >
               Incoming Requests ({(incomingRequests ?? []).length})
             </Text>
             <VStack align="stretch" spacing="6px">
@@ -1109,7 +1150,12 @@ function SettingsView() {
             border="1px solid"
             borderColor={colors.border}
           >
-            <Text fontSize="xs" fontWeight="600" color={colors.textDim} mb="8px">
+            <Text
+              fontSize="xs"
+              fontWeight="600"
+              color={colors.textDim}
+              mb="8px"
+            >
               Outgoing Requests ({(outgoingRequests ?? []).length})
             </Text>
             <VStack align="stretch" spacing="6px">
@@ -1139,7 +1185,12 @@ function SettingsView() {
             border="1px solid"
             borderColor={colors.border}
           >
-            <Text fontSize="xs" fontWeight="600" color={colors.textDim} mb="8px">
+            <Text
+              fontSize="xs"
+              fontWeight="600"
+              color={colors.textDim}
+              mb="8px"
+            >
               Active Connections ({(friends ?? []).length})
             </Text>
             <VStack align="stretch" spacing="6px">
@@ -1230,7 +1281,9 @@ function SettingsView() {
                 {...inputProps}
                 placeholder="Server ID for invite generation"
                 value={selectedServerForInvite}
-                onChange={(event) => setSelectedServerForInvite(event.target.value)}
+                onChange={(event) =>
+                  setSelectedServerForInvite(event.target.value)
+                }
               />
               <Button
                 size="sm"
@@ -1298,7 +1351,8 @@ function SettingsView() {
                       {notification.content}
                     </Text>
                     <Text fontSize="11px" color={colors.textMuted}>
-                      {notification.type} • {notification.isRead ? 'Read' : 'Unread'}
+                      {notification.type} •{' '}
+                      {notification.isRead ? 'Read' : 'Unread'}
                     </Text>
                   </Box>
                   {!notification.isRead && (
