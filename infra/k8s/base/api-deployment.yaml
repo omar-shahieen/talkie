@@ -3,6 +3,13 @@ kind: Deployment
 metadata:
   name: api
 spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  # minReadySeconds: 5 # how many seconds a pod should be ready before being considered available
+  # progressDeadlineSeconds: 600 # what is the deadline for the deployment to be considered failed
   selector:
     matchLabels:
       app.kubernetes.io/name: talkie
@@ -13,6 +20,8 @@ spec:
         app.kubernetes.io/name: talkie
         app.kubernetes.io/component: api
     spec:
+      # Must exceed preStop (5s) + SHUTDOWN_DRAIN_MS (5s) + SHUTDOWN_TIMEOUT_MS (10s) = 20s.
+      terminationGracePeriodSeconds: 30
       containers:
         - name: api
           image: omarmohamed04/talkie-api:latest

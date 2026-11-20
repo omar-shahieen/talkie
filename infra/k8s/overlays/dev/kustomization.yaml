@@ -9,11 +9,11 @@ resources:
   # - ../../infra/monitoring
 replicas:
   - name: api
-    count: 3
-  - name: frontend
-    count: 5
-  - name: worker
     count: 2
+  - name: frontend
+    count: 3
+  - name: worker
+    count: 1
 
 configMapGenerator:
   - name: app-config

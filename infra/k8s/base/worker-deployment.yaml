@@ -13,6 +13,8 @@ spec:
         app.kubernetes.io/name: talkie
         app.kubernetes.io/component: worker
     spec:
+      # Exceeds WORKER_SHUTDOWN_TIMEOUT_MS (30s) so BullMQ jobs drain cleanly.
+      terminationGracePeriodSeconds: 45
       containers:
         - name: worker
           image: omarmohamed04/talkie-api:latest
